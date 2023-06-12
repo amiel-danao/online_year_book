@@ -1,0 +1,29 @@
+Online YearBook Gallery
+
+Deadline: June 10
+
+Total: 6,500
+
+dp:25% = 1625
+
+
+
+web-based only
+
+user types: admin and student
+
+admin: 
+	dashboard (no. of student, no. year books etc. )
+	manage student accounts
+	manage admin accounts
+	manage sections
+	upload yearbook pictures(
+	select course using dropdown,
+	input the year manually,
+	input number of students in the yearbook creation page
+	each student frame should have input for student name)
+	
+
+student accounts: 
+	student login(using the student account created by admin)
+	view all year books( Year Book Page, select course using dropdown)

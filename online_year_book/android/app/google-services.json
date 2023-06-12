@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "67938327347",
+    "project_id": "online-year-book",
+    "storage_bucket": "online-year-book.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:67938327347:android:ff0f2e38c94ac9f815fc46",
+        "android_client_info": {
+          "package_name": "com.thesis.onlineyearbook"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "67938327347-ehts7ncvn2on0v5a2dhcfus2hhm9fbuj.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.thesis.onlineyearbook",
+            "certificate_hash": "9bbb3186b2189ef16d8f272bdab59362c395cbb4"
+          }
+        },
+        {
+          "client_id": "67938327347-uhbsjtlnqp0fem5b60bo8s8gkprnu4ap.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCgnW25hx3IEkFCK5oRZ2AGSGRKqcB9tXk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "67938327347-uhbsjtlnqp0fem5b60bo8s8gkprnu4ap.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "67938327347-03il4ls10ap5g03h6bu3ldpl6c91ll4b.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.thesis.onlineyearbook"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
