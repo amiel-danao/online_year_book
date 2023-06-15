@@ -40,10 +40,19 @@ class _CreateSectionWidgetState extends State<CreateSectionWidget> {
     // On page load action.
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       logFirebaseEvent('CREATE_SECTION_CreateSection_ON_INIT_STA');
-      if (widget.sectionToEdit != null) {
-        setState(() {
-          _model.sectionNameEditController?.text = widget.sectionToEdit!.name;
-        });
+      if (valueOrDefault<bool>(currentUserDocument?.isAdmin, false) == true) {
+        if (widget.sectionToEdit != null) {
+          setState(() {
+            _model.sectionNameEditController?.text = widget.sectionToEdit!.name;
+          });
+          return;
+        } else {
+          return;
+        }
+      } else {
+        context.pushNamed('YearBooksPage');
+
+        return;
       }
     });
 

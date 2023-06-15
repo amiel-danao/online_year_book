@@ -21,35 +21,41 @@ import 'package:provider/provider.dart';
 class StudentsPageModel extends FlutterFlowModel {
   ///  Local state fields for this page.
 
-  String? searchText;
-
   DocumentReference? selectedCourse;
 
   int? selectedYear;
 
-  bool showList = true;
+  List<String> yearList = [];
+  void addToYearList(String item) => yearList.add(item);
+  void removeFromYearList(String item) => yearList.remove(item);
+  void removeAtIndexFromYearList(int index) => yearList.removeAt(index);
+  void updateYearListAtIndex(int index, Function(String) updateFn) =>
+      yearList[index] = updateFn(yearList[index]);
 
   ///  State fields for stateful widgets in this page.
 
   final unfocusNode = FocusNode();
+  // Stores action output result for [Custom Action - generateYears] action in studentsPage widget.
+  List<String>? years;
   // Model for webNav component.
   late WebNavModel webNavModel;
-  // State field(s) for searchField widget.
-  TextEditingController? searchFieldController;
-  String? Function(BuildContext, String?)? searchFieldControllerValidator;
   // State field(s) for courseDropDown widget.
   String? courseDropDownValue;
   FormFieldController<String>? courseDropDownValueController;
+  // Stores action output result for [Custom Action - getCourseReferenceByName] action in courseDropDown widget.
+  DocumentReference? course;
   // State field(s) for schoolYearDropDown widget.
   String? schoolYearDropDownValue;
   FormFieldController<String>? schoolYearDropDownValueController;
+  // Stores action output result for [Custom Action - stringToInt] action in schoolYearDropDown widget.
+  int? yearInt;
   // State field(s) for ListView widget.
   PagingController<DocumentSnapshot?, StudentsRecord>? pagingController;
   Query? pagingQuery;
   List<StreamSubscription?> streamSubscriptions = [];
 
   // Stores action output result for [Custom Action - deleteStudentAccount] action in Button widget.
-  bool? deleteStudentResult;
+  String? deleteStudentResult;
 
   /// Initialization and disposal methods.
 
@@ -60,7 +66,6 @@ class StudentsPageModel extends FlutterFlowModel {
   void dispose() {
     unfocusNode.dispose();
     webNavModel.dispose();
-    searchFieldController?.dispose();
     streamSubscriptions.forEach((s) => s?.cancel());
   }
 

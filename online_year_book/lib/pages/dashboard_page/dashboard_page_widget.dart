@@ -1,3 +1,4 @@
+import '/auth/firebase_auth/auth_util.dart';
 import '/components/web_nav/web_nav_widget.dart';
 import '/flutter_flow/flutter_flow_animations.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
@@ -499,14 +500,20 @@ class _DashboardPageWidgetState extends State<DashboardPageWidget>
     // On page load action.
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       logFirebaseEvent('DASHBOARD_DashboardPage_ON_INIT_STATE');
-      _model.fetchedUserCount = await actions.getUsersCount();
-      _model.fetchedYearBookCount = await actions.getYearBookCount();
-      _model.fetchedStudentsCount = await actions.getStudentCount();
-      setState(() {
-        _model.userCount = _model.fetchedUserCount!;
-        _model.studentCount = _model.fetchedStudentsCount!;
-        _model.yearBookCount = _model.fetchedYearBookCount!;
-      });
+      if (valueOrDefault<bool>(currentUserDocument?.isAdmin, false) != true) {
+        context.pushNamed('YearBooksPage');
+
+        return;
+      } else {
+        _model.fetchedUserCount = await actions.getUsersCount();
+        _model.fetchedYearBookCount = await actions.getYearBookCount();
+        _model.fetchedStudentsCount = await actions.getStudentCount();
+        setState(() {
+          _model.userCount = _model.fetchedUserCount!;
+          _model.studentCount = _model.fetchedStudentsCount!;
+          _model.yearBookCount = _model.fetchedYearBookCount!;
+        });
+      }
     });
 
     setupAnimations(

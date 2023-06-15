@@ -9,16 +9,17 @@ import 'package:flutter/material.dart';
 
 import 'package:cloud_functions/cloud_functions.dart';
 
-Future<bool> deleteStudentAccount(DocumentReference studentRef) async {
-  var snapshot = await FirebaseFirestore.instance
-      .collection("users")
-      .where("student_profile", isEqualTo: studentRef)
-      .get();
+Future<String> deleteStudentAccount(DocumentReference studentRef) async {
+  CollectionReference collectionRef =
+      FirebaseFirestore.instance.collection('users');
 
-  if (snapshot.docs.isNotEmpty) {
-    var document = snapshot.docs.first;
-    var data = document.data();
-    var uid = data['uid'];
+  QuerySnapshot snapshots =
+      await collectionRef.where("student_profile", isEqualTo: studentRef).get();
+
+  if (snapshots.docs.isNotEmpty) {
+    var document = snapshots.docs.first;
+    var data = document.data() as Map<String, dynamic>;
+    var uid = data['id'];
 
     final deleteFunction =
         FirebaseFunctions.instance.httpsCallable('deleteUser');
@@ -27,18 +28,18 @@ Future<bool> deleteStudentAccount(DocumentReference studentRef) async {
       final data = result.data as Map<String, dynamic>;
       if (data['success'] == true) {
         print('User deleted successfully.');
-        return true;
+        return "Success";
       } else {
         print('Failed to delete user.');
-        return false;
+        return data['error'];
       }
     } catch (e) {
       print('Error deleting user: $e');
-      return false;
+      return 'Error deleting user: $e';
     }
   }
 
-  return false;
+  return "Success";
 }
 // Set your action name, define your arguments and return parameter,
 // and then add the boilerplate code using the button on the right!

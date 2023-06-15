@@ -18,8 +18,6 @@ export '/pages/project_details/project_details_widget.dart'
 export '/pages/search_page/search_page_widget.dart' show SearchPageWidget;
 export '/lead_capture_page/lead_capture_page_widget.dart'
     show LeadCapturePageWidget;
-export '/pages/create_student_old/create_student_old_widget.dart'
-    show CreateStudentOldWidget;
 export '/pages/create_section/create_section_widget.dart'
     show CreateSectionWidget;
 export '/pages/sections_page/sections_page_widget.dart' show SectionsPageWidget;
@@ -29,3 +27,4 @@ export '/pages/create_student/create_student_widget.dart'
     show CreateStudentWidget;
 export '/pages/create_year_book/create_year_book_widget.dart'
     show CreateYearBookWidget;
+export '/pages/create_admin/create_admin_widget.dart' show CreateAdminWidget;

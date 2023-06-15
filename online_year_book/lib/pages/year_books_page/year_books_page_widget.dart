@@ -1,3 +1,4 @@
+import '/auth/firebase_auth/auth_util.dart';
 import '/backend/backend.dart';
 import '/components/web_nav/web_nav_widget.dart';
 import '/flutter_flow/flutter_flow_animations.dart';
@@ -7,8 +8,11 @@ import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/flutter_flow/form_field_controller.dart';
+import '/custom_code/actions/index.dart' as actions;
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:easy_debounce/easy_debounce.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -61,6 +65,15 @@ class _YearBooksPageWidgetState extends State<YearBooksPageWidget>
 
     logFirebaseEvent('screen_view',
         parameters: {'screen_name': 'YearBooksPage'});
+    // On page load action.
+    SchedulerBinding.instance.addPostFrameCallback((_) async {
+      logFirebaseEvent('YEAR_BOOKS_YearBooksPage_ON_INIT_STATE');
+      _model.years = await actions.generateYears();
+      setState(() {
+        _model.yearList = _model.years!.toList().cast<String>();
+      });
+    });
+
     _model.searchFieldController ??= TextEditingController();
     setupAnimations(
       animationsMap.values.where((anim) =>
@@ -239,61 +252,73 @@ class _YearBooksPageWidgetState extends State<YearBooksPageWidget>
                                           },
                                         ),
                                       ),
-                                    FFButtonWidget(
-                                      onPressed: () async {
-                                        logFirebaseEvent(
-                                            'YEAR_BOOKS_NEW_YEAR_BOOK_BTN_ON_TAP');
+                                    if (valueOrDefault<bool>(
+                                            currentUserDocument?.isAdmin,
+                                            false) ==
+                                        true)
+                                      AuthUserStreamWidget(
+                                        builder: (context) => FFButtonWidget(
+                                          onPressed: () async {
+                                            logFirebaseEvent(
+                                                'YEAR_BOOKS_NEW_YEAR_BOOK_BTN_ON_TAP');
 
-                                        context.pushNamed(
-                                          'CreateYearBook',
-                                          extra: <String, dynamic>{
-                                            kTransitionInfoKey: TransitionInfo(
-                                              hasTransition: true,
-                                              transitionType: PageTransitionType
-                                                  .rightToLeft,
-                                            ),
+                                            context.pushNamed(
+                                              'CreateYearBook',
+                                              extra: <String, dynamic>{
+                                                kTransitionInfoKey:
+                                                    TransitionInfo(
+                                                  hasTransition: true,
+                                                  transitionType:
+                                                      PageTransitionType
+                                                          .rightToLeft,
+                                                ),
+                                              },
+                                            );
                                           },
-                                        );
-                                      },
-                                      text: FFLocalizations.of(context).getText(
-                                        'bjle002a' /* New Year Book */,
-                                      ),
-                                      icon: Icon(
-                                        Icons.add,
-                                        size: 15.0,
-                                      ),
-                                      options: FFButtonOptions(
-                                        height: 40.0,
-                                        padding: EdgeInsetsDirectional.fromSTEB(
-                                            24.0, 0.0, 24.0, 0.0),
-                                        iconPadding:
-                                            EdgeInsetsDirectional.fromSTEB(
-                                                0.0, 0.0, 0.0, 0.0),
-                                        color: FlutterFlowTheme.of(context)
-                                            .primary,
-                                        textStyle: FlutterFlowTheme.of(context)
-                                            .titleSmall
-                                            .override(
-                                              fontFamily:
-                                                  FlutterFlowTheme.of(context)
-                                                      .titleSmallFamily,
-                                              color: Colors.white,
-                                              useGoogleFonts: GoogleFonts
-                                                      .asMap()
-                                                  .containsKey(
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .titleSmallFamily),
+                                          text: FFLocalizations.of(context)
+                                              .getText(
+                                            'bjle002a' /* New Year Book */,
+                                          ),
+                                          icon: Icon(
+                                            Icons.add,
+                                            size: 15.0,
+                                          ),
+                                          options: FFButtonOptions(
+                                            height: 40.0,
+                                            padding:
+                                                EdgeInsetsDirectional.fromSTEB(
+                                                    24.0, 0.0, 24.0, 0.0),
+                                            iconPadding:
+                                                EdgeInsetsDirectional.fromSTEB(
+                                                    0.0, 0.0, 0.0, 0.0),
+                                            color: FlutterFlowTheme.of(context)
+                                                .primary,
+                                            textStyle:
+                                                FlutterFlowTheme.of(context)
+                                                    .titleSmall
+                                                    .override(
+                                                      fontFamily:
+                                                          FlutterFlowTheme.of(
+                                                                  context)
+                                                              .titleSmallFamily,
+                                                      color: Colors.white,
+                                                      useGoogleFonts: GoogleFonts
+                                                              .asMap()
+                                                          .containsKey(
+                                                              FlutterFlowTheme.of(
+                                                                      context)
+                                                                  .titleSmallFamily),
+                                                    ),
+                                            elevation: 3.0,
+                                            borderSide: BorderSide(
+                                              color: Colors.transparent,
+                                              width: 1.0,
                                             ),
-                                        elevation: 3.0,
-                                        borderSide: BorderSide(
-                                          color: Colors.transparent,
-                                          width: 1.0,
+                                            borderRadius:
+                                                BorderRadius.circular(8.0),
+                                          ),
                                         ),
-                                        borderRadius:
-                                            BorderRadius.circular(8.0),
                                       ),
-                                    ),
                                   ],
                                 ),
                               ),
@@ -314,11 +339,23 @@ class _YearBooksPageWidgetState extends State<YearBooksPageWidget>
                                       child: TextFormField(
                                         controller:
                                             _model.searchFieldController,
+                                        onChanged: (_) => EasyDebounce.debounce(
+                                          '_model.searchFieldController',
+                                          Duration(milliseconds: 2000),
+                                          () async {
+                                            logFirebaseEvent(
+                                                'YEAR_BOOKS_searchField_ON_TEXTFIELD_CHAN');
+                                            setState(() {
+                                              _model.filterYearBookName = _model
+                                                  .searchFieldController.text;
+                                            });
+                                          },
+                                        ),
                                         obscureText: false,
                                         decoration: InputDecoration(
                                           labelText: FFLocalizations.of(context)
                                               .getText(
-                                            'o4ty3tat' /* Search for your students... */,
+                                            'o4ty3tat' /* Search for your yearbooks titl... */,
                                           ),
                                           labelStyle:
                                               FlutterFlowTheme.of(context)
@@ -395,43 +432,67 @@ class _YearBooksPageWidgetState extends State<YearBooksPageWidget>
                                       ),
                                     ),
                                   ),
-                                FlutterFlowDropDown<String>(
-                                  controller:
-                                      _model.courseDropDownValueController ??=
+                                FutureBuilder<List<CourseRecord>>(
+                                  future: queryCourseRecordOnce(),
+                                  builder: (context, snapshot) {
+                                    // Customize what your widget looks like when it's loading.
+                                    if (!snapshot.hasData) {
+                                      return Center(
+                                        child: SizedBox(
+                                          width: 50.0,
+                                          height: 50.0,
+                                          child: CircularProgressIndicator(
+                                            color: FlutterFlowTheme.of(context)
+                                                .success,
+                                          ),
+                                        ),
+                                      );
+                                    }
+                                    List<CourseRecord>
+                                        courseDropDownCourseRecordList =
+                                        snapshot.data!;
+                                    return FlutterFlowDropDown<String>(
+                                      controller: _model
+                                              .courseDropDownValueController ??=
                                           FormFieldController<String>(null),
-                                  options: <String>[],
-                                  onChanged: (val) => setState(
-                                      () => _model.courseDropDownValue = val),
-                                  width: 300.0,
-                                  height: 50.0,
-                                  textStyle:
-                                      FlutterFlowTheme.of(context).bodyMedium,
-                                  hintText: FFLocalizations.of(context).getText(
-                                    'fogrv6a5' /* Filter by course... */,
-                                  ),
-                                  icon: Icon(
-                                    Icons.keyboard_arrow_down_rounded,
-                                    color: FlutterFlowTheme.of(context)
-                                        .secondaryText,
-                                    size: 24.0,
-                                  ),
-                                  fillColor: FlutterFlowTheme.of(context)
-                                      .secondaryBackground,
-                                  elevation: 2.0,
-                                  borderColor:
-                                      FlutterFlowTheme.of(context).alternate,
-                                  borderWidth: 2.0,
-                                  borderRadius: 8.0,
-                                  margin: EdgeInsetsDirectional.fromSTEB(
-                                      16.0, 4.0, 16.0, 4.0),
-                                  hidesUnderline: true,
-                                  isSearchable: false,
+                                      options: courseDropDownCourseRecordList
+                                          .map((e) => e.name)
+                                          .toList(),
+                                      onChanged: (val) => setState(() =>
+                                          _model.courseDropDownValue = val),
+                                      width: 300.0,
+                                      height: 50.0,
+                                      textStyle: FlutterFlowTheme.of(context)
+                                          .bodyMedium,
+                                      hintText:
+                                          FFLocalizations.of(context).getText(
+                                        'fogrv6a5' /* Filter by course... */,
+                                      ),
+                                      icon: Icon(
+                                        Icons.keyboard_arrow_down_rounded,
+                                        color: FlutterFlowTheme.of(context)
+                                            .secondaryText,
+                                        size: 24.0,
+                                      ),
+                                      fillColor: FlutterFlowTheme.of(context)
+                                          .secondaryBackground,
+                                      elevation: 2.0,
+                                      borderColor: FlutterFlowTheme.of(context)
+                                          .alternate,
+                                      borderWidth: 2.0,
+                                      borderRadius: 8.0,
+                                      margin: EdgeInsetsDirectional.fromSTEB(
+                                          16.0, 4.0, 16.0, 4.0),
+                                      hidesUnderline: true,
+                                      isSearchable: false,
+                                    );
+                                  },
                                 ),
                                 FlutterFlowDropDown<String>(
                                   controller: _model
                                           .schoolYearDropDownValueController ??=
                                       FormFieldController<String>(null),
-                                  options: <String>[],
+                                  options: _model.yearList,
                                   onChanged: (val) => setState(() =>
                                       _model.schoolYearDropDownValue = val),
                                   width: 300.0,
@@ -600,9 +661,21 @@ class _YearBooksPageWidgetState extends State<YearBooksPageWidget>
                                               final Query<Object?> Function(
                                                       Query<Object?>)
                                                   queryBuilder =
-                                                  (yearBooksRecord) =>
-                                                      yearBooksRecord.orderBy(
-                                                          'time_posted',
+                                                  (yearBooksRecord) => yearBooksRecord
+                                                      .where('title',
+                                                          isEqualTo:
+                                                              _model.filterYearBookName !=
+                                                                      ''
+                                                                  ? _model
+                                                                      .filterYearBookName
+                                                                  : null)
+                                                      .where('course',
+                                                          isEqualTo: _model
+                                                              .selectedCourse)
+                                                      .where('school_year',
+                                                          isEqualTo:
+                                                              _model.filterYear)
+                                                      .orderBy('time_posted',
                                                           descending: true);
                                               if (_model.pagingController !=
                                                   null) {
@@ -632,13 +705,28 @@ class _YearBooksPageWidgetState extends State<YearBooksPageWidget>
                                                   .addPageRequestListener(
                                                       (nextPageMarker) {
                                                 queryYearBooksRecordPage(
-                                                  queryBuilder:
-                                                      (yearBooksRecord) =>
-                                                          yearBooksRecord
-                                                              .orderBy(
-                                                                  'time_posted',
-                                                                  descending:
-                                                                      true),
+                                                  queryBuilder: (yearBooksRecord) =>
+                                                      yearBooksRecord
+                                                          .where(
+                                                              'title',
+                                                              isEqualTo: _model
+                                                                          .filterYearBookName !=
+                                                                      ''
+                                                                  ? _model
+                                                                      .filterYearBookName
+                                                                  : null)
+                                                          .where(
+                                                              'course',
+                                                              isEqualTo:
+                                                                  _model
+                                                                      .selectedCourse)
+                                                          .where(
+                                                              'school_year',
+                                                              isEqualTo: _model
+                                                                  .filterYear)
+                                                          .orderBy(
+                                                              'time_posted',
+                                                              descending: true),
                                                   nextPageMarker:
                                                       nextPageMarker,
                                                   pageSize: 25,
@@ -850,10 +938,10 @@ class _YearBooksPageWidgetState extends State<YearBooksPageWidget>
                                                           ))
                                                             Expanded(
                                                               flex: 1,
-                                                              child: StreamBuilder<
+                                                              child: FutureBuilder<
                                                                   SectionRecord>(
-                                                                stream: SectionRecord
-                                                                    .getDocument(
+                                                                future: SectionRecord
+                                                                    .getDocumentOnce(
                                                                         listViewYearBooksRecord
                                                                             .section!),
                                                                 builder: (context,
@@ -880,8 +968,12 @@ class _YearBooksPageWidgetState extends State<YearBooksPageWidget>
                                                                       snapshot
                                                                           .data!;
                                                                   return Text(
-                                                                    textSectionRecord
-                                                                        .name,
+                                                                    valueOrDefault<
+                                                                        String>(
+                                                                      textSectionRecord
+                                                                          .name,
+                                                                      'no section',
+                                                                    ),
                                                                     style: FlutterFlowTheme.of(
                                                                             context)
                                                                         .bodyMedium,
@@ -912,222 +1004,296 @@ class _YearBooksPageWidgetState extends State<YearBooksPageWidget>
                                                                   ),
                                                             ),
                                                           ),
-                                                          Flexible(
-                                                            child:
-                                                                FFButtonWidget(
-                                                              onPressed:
-                                                                  () async {
-                                                                logFirebaseEvent(
-                                                                    'YEAR_BOOKS_editStudentButton_ON_TAP');
+                                                          Expanded(
+                                                            child: Row(
+                                                              mainAxisSize:
+                                                                  MainAxisSize
+                                                                      .max,
+                                                              children: [
+                                                                if (valueOrDefault<
+                                                                            bool>(
+                                                                        currentUserDocument
+                                                                            ?.isAdmin,
+                                                                        false) ==
+                                                                    true)
+                                                                  Expanded(
+                                                                    child:
+                                                                        AuthUserStreamWidget(
+                                                                      builder:
+                                                                          (context) =>
+                                                                              FFButtonWidget(
+                                                                        onPressed:
+                                                                            () async {
+                                                                          logFirebaseEvent(
+                                                                              'YEAR_BOOKS_editStudentButton_ON_TAP');
 
-                                                                context
-                                                                    .pushNamed(
-                                                                  'CreateYearBook',
-                                                                  queryParameters:
-                                                                      {
-                                                                    'yearBookToEdit':
-                                                                        serializeParam(
-                                                                      listViewYearBooksRecord,
-                                                                      ParamType
-                                                                          .Document,
-                                                                    ),
-                                                                  }.withoutNulls,
-                                                                  extra: <
-                                                                      String,
-                                                                      dynamic>{
-                                                                    'yearBookToEdit':
-                                                                        listViewYearBooksRecord,
-                                                                    kTransitionInfoKey:
-                                                                        TransitionInfo(
-                                                                      hasTransition:
-                                                                          true,
-                                                                      transitionType:
-                                                                          PageTransitionType
-                                                                              .rightToLeft,
-                                                                    ),
-                                                                  },
-                                                                );
-                                                              },
-                                                              text: FFLocalizations
-                                                                      .of(context)
-                                                                  .getText(
-                                                                'fx59bpfu' /* Edit */,
-                                                              ),
-                                                              icon: Icon(
-                                                                Icons.edit,
-                                                                size: 15.0,
-                                                              ),
-                                                              options:
-                                                                  FFButtonOptions(
-                                                                height: 40.0,
-                                                                padding: EdgeInsetsDirectional
-                                                                    .fromSTEB(
-                                                                        24.0,
-                                                                        0.0,
-                                                                        24.0,
-                                                                        0.0),
-                                                                iconPadding:
-                                                                    EdgeInsetsDirectional
-                                                                        .fromSTEB(
-                                                                            0.0,
-                                                                            0.0,
-                                                                            0.0,
-                                                                            0.0),
-                                                                color: FlutterFlowTheme.of(
-                                                                        context)
-                                                                    .accent4,
-                                                                textStyle: FlutterFlowTheme.of(
-                                                                        context)
-                                                                    .titleSmall
-                                                                    .override(
-                                                                      fontFamily:
-                                                                          FlutterFlowTheme.of(context)
-                                                                              .titleSmallFamily,
-                                                                      color: Colors
-                                                                          .white,
-                                                                      useGoogleFonts: GoogleFonts
-                                                                              .asMap()
-                                                                          .containsKey(
-                                                                              FlutterFlowTheme.of(context).titleSmallFamily),
-                                                                    ),
-                                                                elevation: 3.0,
-                                                                borderSide:
-                                                                    BorderSide(
-                                                                  color: Colors
-                                                                      .transparent,
-                                                                  width: 1.0,
-                                                                ),
-                                                                borderRadius:
-                                                                    BorderRadius
-                                                                        .circular(
-                                                                            8.0),
-                                                              ),
-                                                            ),
-                                                          ),
-                                                          FFButtonWidget(
-                                                            onPressed:
-                                                                () async {
-                                                              logFirebaseEvent(
-                                                                  'YEAR_BOOKS_PAGE_PAGE_DELETE_BTN_ON_TAP');
-                                                              var confirmDialogResponse =
-                                                                  await showDialog<
-                                                                          bool>(
-                                                                        context:
-                                                                            context,
-                                                                        builder:
-                                                                            (alertDialogContext) {
-                                                                          return AlertDialog(
-                                                                            title:
-                                                                                Text('Confirm delete'),
-                                                                            content:
-                                                                                Text(valueOrDefault<String>(
-                                                                              'Are you sure you want to delete this yearbook?${listViewYearBooksRecord.title}',
-                                                                              'Are you sure you want to delete this yearbook?',
-                                                                            )),
-                                                                            actions: [
-                                                                              TextButton(
-                                                                                onPressed: () => Navigator.pop(alertDialogContext, false),
-                                                                                child: Text('Cancel'),
+                                                                          context
+                                                                              .pushNamed(
+                                                                            'CreateYearBook',
+                                                                            queryParameters:
+                                                                                {
+                                                                              'yearBookToEdit': serializeParam(
+                                                                                listViewYearBooksRecord,
+                                                                                ParamType.Document,
                                                                               ),
-                                                                              TextButton(
-                                                                                onPressed: () => Navigator.pop(alertDialogContext, true),
-                                                                                child: Text('Confirm'),
+                                                                            }.withoutNulls,
+                                                                            extra: <String,
+                                                                                dynamic>{
+                                                                              'yearBookToEdit': listViewYearBooksRecord,
+                                                                              kTransitionInfoKey: TransitionInfo(
+                                                                                hasTransition: true,
+                                                                                transitionType: PageTransitionType.rightToLeft,
                                                                               ),
-                                                                            ],
+                                                                            },
                                                                           );
                                                                         },
-                                                                      ) ??
-                                                                      false;
-                                                              if (confirmDialogResponse) {
-                                                                await listViewYearBooksRecord
-                                                                    .reference
-                                                                    .delete();
-                                                                ScaffoldMessenger.of(
-                                                                        context)
-                                                                    .clearSnackBars();
-                                                                ScaffoldMessenger.of(
-                                                                        context)
-                                                                    .showSnackBar(
-                                                                  SnackBar(
-                                                                    content:
-                                                                        Text(
-                                                                      'Year book was deleted successfully',
-                                                                      style:
-                                                                          TextStyle(
-                                                                        color: FlutterFlowTheme.of(context)
-                                                                            .primary,
+                                                                        text: FFLocalizations.of(context)
+                                                                            .getText(
+                                                                          'gniqu6fr' /* Edit */,
+                                                                        ),
+                                                                        icon:
+                                                                            Icon(
+                                                                          Icons
+                                                                              .edit,
+                                                                          size:
+                                                                              15.0,
+                                                                        ),
+                                                                        options:
+                                                                            FFButtonOptions(
+                                                                          height:
+                                                                              40.0,
+                                                                          padding: EdgeInsetsDirectional.fromSTEB(
+                                                                              24.0,
+                                                                              0.0,
+                                                                              24.0,
+                                                                              0.0),
+                                                                          iconPadding: EdgeInsetsDirectional.fromSTEB(
+                                                                              0.0,
+                                                                              0.0,
+                                                                              0.0,
+                                                                              0.0),
+                                                                          color:
+                                                                              FlutterFlowTheme.of(context).accent4,
+                                                                          textStyle: FlutterFlowTheme.of(context)
+                                                                              .titleSmall
+                                                                              .override(
+                                                                                fontFamily: FlutterFlowTheme.of(context).titleSmallFamily,
+                                                                                color: Colors.white,
+                                                                                useGoogleFonts: GoogleFonts.asMap().containsKey(FlutterFlowTheme.of(context).titleSmallFamily),
+                                                                              ),
+                                                                          elevation:
+                                                                              3.0,
+                                                                          borderSide:
+                                                                              BorderSide(
+                                                                            color:
+                                                                                Colors.transparent,
+                                                                            width:
+                                                                                1.0,
+                                                                          ),
+                                                                          borderRadius:
+                                                                              BorderRadius.circular(8.0),
+                                                                        ),
                                                                       ),
                                                                     ),
-                                                                    duration: Duration(
-                                                                        milliseconds:
-                                                                            4000),
-                                                                    backgroundColor:
-                                                                        Colors
-                                                                            .black,
                                                                   ),
-                                                                );
+                                                                if (valueOrDefault<
+                                                                            bool>(
+                                                                        currentUserDocument
+                                                                            ?.isAdmin,
+                                                                        false) ==
+                                                                    true)
+                                                                  Expanded(
+                                                                    child:
+                                                                        AuthUserStreamWidget(
+                                                                      builder:
+                                                                          (context) =>
+                                                                              FFButtonWidget(
+                                                                        onPressed:
+                                                                            () async {
+                                                                          logFirebaseEvent(
+                                                                              'YEAR_BOOKS_PAGE_PAGE_DELETE_BTN_ON_TAP');
+                                                                          var confirmDialogResponse = await showDialog<bool>(
+                                                                                context: context,
+                                                                                builder: (alertDialogContext) {
+                                                                                  return AlertDialog(
+                                                                                    title: Text('Confirm delete'),
+                                                                                    content: Text(valueOrDefault<String>(
+                                                                                      'Are you sure you want to delete this yearbook?${listViewYearBooksRecord.title}',
+                                                                                      'Are you sure you want to delete this yearbook?',
+                                                                                    )),
+                                                                                    actions: [
+                                                                                      TextButton(
+                                                                                        onPressed: () => Navigator.pop(alertDialogContext, false),
+                                                                                        child: Text('Cancel'),
+                                                                                      ),
+                                                                                      TextButton(
+                                                                                        onPressed: () => Navigator.pop(alertDialogContext, true),
+                                                                                        child: Text('Confirm'),
+                                                                                      ),
+                                                                                    ],
+                                                                                  );
+                                                                                },
+                                                                              ) ??
+                                                                              false;
+                                                                          if (confirmDialogResponse) {
+                                                                            await listViewYearBooksRecord.reference.delete();
+                                                                            ScaffoldMessenger.of(context).clearSnackBars();
+                                                                            ScaffoldMessenger.of(context).showSnackBar(
+                                                                              SnackBar(
+                                                                                content: Text(
+                                                                                  'Year book was deleted successfully',
+                                                                                  style: TextStyle(
+                                                                                    color: FlutterFlowTheme.of(context).primary,
+                                                                                  ),
+                                                                                ),
+                                                                                duration: Duration(milliseconds: 4000),
+                                                                                backgroundColor: Colors.black,
+                                                                              ),
+                                                                            );
 
-                                                                context.goNamed(
-                                                                    'YearBooksPage');
+                                                                            context.goNamed('YearBooksPage');
 
-                                                                return;
-                                                              } else {
-                                                                return;
-                                                              }
-                                                            },
-                                                            text: FFLocalizations
-                                                                    .of(context)
-                                                                .getText(
-                                                              'x9rd31cy' /* Delete */,
-                                                            ),
-                                                            icon: Icon(
-                                                              Icons
-                                                                  .delete_forever,
-                                                              size: 15.0,
-                                                            ),
-                                                            options:
-                                                                FFButtonOptions(
-                                                              height: 40.0,
-                                                              padding:
-                                                                  EdgeInsetsDirectional
-                                                                      .fromSTEB(
-                                                                          24.0,
-                                                                          0.0,
-                                                                          24.0,
-                                                                          0.0),
-                                                              iconPadding:
-                                                                  EdgeInsetsDirectional
-                                                                      .fromSTEB(
-                                                                          0.0,
-                                                                          0.0,
-                                                                          0.0,
-                                                                          0.0),
-                                                              color: FlutterFlowTheme
-                                                                      .of(context)
-                                                                  .error,
-                                                              textStyle:
-                                                                  FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .titleSmall
-                                                                      .override(
-                                                                        fontFamily:
-                                                                            FlutterFlowTheme.of(context).titleSmallFamily,
-                                                                        color: Colors
-                                                                            .white,
-                                                                        useGoogleFonts:
-                                                                            GoogleFonts.asMap().containsKey(FlutterFlowTheme.of(context).titleSmallFamily),
+                                                                            return;
+                                                                          } else {
+                                                                            return;
+                                                                          }
+                                                                        },
+                                                                        text: FFLocalizations.of(context)
+                                                                            .getText(
+                                                                          'x9rd31cy' /* Delete */,
+                                                                        ),
+                                                                        icon:
+                                                                            Icon(
+                                                                          Icons
+                                                                              .delete_forever,
+                                                                          size:
+                                                                              15.0,
+                                                                        ),
+                                                                        options:
+                                                                            FFButtonOptions(
+                                                                          height:
+                                                                              40.0,
+                                                                          padding: EdgeInsetsDirectional.fromSTEB(
+                                                                              24.0,
+                                                                              0.0,
+                                                                              24.0,
+                                                                              0.0),
+                                                                          iconPadding: EdgeInsetsDirectional.fromSTEB(
+                                                                              0.0,
+                                                                              0.0,
+                                                                              0.0,
+                                                                              0.0),
+                                                                          color:
+                                                                              FlutterFlowTheme.of(context).error,
+                                                                          textStyle: FlutterFlowTheme.of(context)
+                                                                              .titleSmall
+                                                                              .override(
+                                                                                fontFamily: FlutterFlowTheme.of(context).titleSmallFamily,
+                                                                                color: Colors.white,
+                                                                                useGoogleFonts: GoogleFonts.asMap().containsKey(FlutterFlowTheme.of(context).titleSmallFamily),
+                                                                              ),
+                                                                          elevation:
+                                                                              3.0,
+                                                                          borderSide:
+                                                                              BorderSide(
+                                                                            color:
+                                                                                Colors.transparent,
+                                                                            width:
+                                                                                1.0,
+                                                                          ),
+                                                                          borderRadius:
+                                                                              BorderRadius.circular(8.0),
+                                                                        ),
                                                                       ),
-                                                              elevation: 3.0,
-                                                              borderSide:
-                                                                  BorderSide(
-                                                                color: Colors
-                                                                    .transparent,
-                                                                width: 1.0,
-                                                              ),
-                                                              borderRadius:
-                                                                  BorderRadius
-                                                                      .circular(
-                                                                          8.0),
+                                                                    ),
+                                                                  ),
+                                                                if (valueOrDefault<
+                                                                            bool>(
+                                                                        currentUserDocument
+                                                                            ?.isAdmin,
+                                                                        false) !=
+                                                                    true)
+                                                                  Expanded(
+                                                                    child:
+                                                                        AuthUserStreamWidget(
+                                                                      builder:
+                                                                          (context) =>
+                                                                              FFButtonWidget(
+                                                                        onPressed:
+                                                                            () async {
+                                                                          logFirebaseEvent(
+                                                                              'YEAR_BOOKS_editStudentButton_ON_TAP');
+
+                                                                          context
+                                                                              .pushNamed(
+                                                                            'CreateYearBook',
+                                                                            queryParameters:
+                                                                                {
+                                                                              'yearBookToEdit': serializeParam(
+                                                                                listViewYearBooksRecord,
+                                                                                ParamType.Document,
+                                                                              ),
+                                                                            }.withoutNulls,
+                                                                            extra: <String,
+                                                                                dynamic>{
+                                                                              'yearBookToEdit': listViewYearBooksRecord,
+                                                                              kTransitionInfoKey: TransitionInfo(
+                                                                                hasTransition: true,
+                                                                                transitionType: PageTransitionType.rightToLeft,
+                                                                              ),
+                                                                            },
+                                                                          );
+                                                                        },
+                                                                        text: FFLocalizations.of(context)
+                                                                            .getText(
+                                                                          'fx59bpfu' /* View */,
+                                                                        ),
+                                                                        icon:
+                                                                            Icon(
+                                                                          Icons
+                                                                              .remove_red_eye,
+                                                                          size:
+                                                                              15.0,
+                                                                        ),
+                                                                        options:
+                                                                            FFButtonOptions(
+                                                                          height:
+                                                                              40.0,
+                                                                          padding: EdgeInsetsDirectional.fromSTEB(
+                                                                              24.0,
+                                                                              0.0,
+                                                                              24.0,
+                                                                              0.0),
+                                                                          iconPadding: EdgeInsetsDirectional.fromSTEB(
+                                                                              0.0,
+                                                                              0.0,
+                                                                              0.0,
+                                                                              0.0),
+                                                                          color:
+                                                                              FlutterFlowTheme.of(context).success,
+                                                                          textStyle: FlutterFlowTheme.of(context)
+                                                                              .titleSmall
+                                                                              .override(
+                                                                                fontFamily: FlutterFlowTheme.of(context).titleSmallFamily,
+                                                                                color: Colors.white,
+                                                                                useGoogleFonts: GoogleFonts.asMap().containsKey(FlutterFlowTheme.of(context).titleSmallFamily),
+                                                                              ),
+                                                                          elevation:
+                                                                              3.0,
+                                                                          borderSide:
+                                                                              BorderSide(
+                                                                            color:
+                                                                                Colors.transparent,
+                                                                            width:
+                                                                                1.0,
+                                                                          ),
+                                                                          borderRadius:
+                                                                              BorderRadius.circular(8.0),
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                              ],
                                                             ),
                                                           ),
                                                         ],

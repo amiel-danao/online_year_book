@@ -45,38 +45,60 @@ class _CreateStudentWidgetState extends State<CreateStudentWidget> {
     // On page load action.
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       logFirebaseEvent('CREATE_STUDENT_CreateStudent_ON_INIT_STA');
-      _model.years = await actions.generateYears();
-      _model.allCourses = await actions.getAllCourses();
-      _model.allSections = await actions.getAllSections();
-      setState(() {
-        _model.yearList = _model.years!.toList().cast<String>();
-        _model.courseList = _model.allCourses!.toList().cast<String>();
-        _model.sectionList = _model.allSections!.toList().cast<String>();
-      });
-      if (widget.studentToEdit != null) {
+      if (valueOrDefault<bool>(currentUserDocument?.isAdmin, false) == true) {
+        _model.years = await actions.generateYears();
+        _model.allCourses = await actions.getAllCourses();
+        _model.allSections = await actions.getAllSections();
         setState(() {
-          _model.firstNameEditController?.text =
-              widget.studentToEdit!.firstName;
+          _model.yearList = _model.years!.toList().cast<String>();
+          _model.courseList = _model.allCourses!.toList().cast<String>();
+          _model.sectionList = _model.allSections!.toList().cast<String>();
         });
-        setState(() {
-          _model.middleNameEditController?.text =
-              widget.studentToEdit!.middleName;
-        });
-        setState(() {
-          _model.lastNameEditController?.text = widget.studentToEdit!.lastName;
-        });
-        _model.defaultSectionName = await actions.getSectionNameByReference(
-          widget.studentToEdit!.section!.id,
-        );
-        _model.defaultCourseName = await actions.getCourseNameByReference(
-          widget.studentToEdit!.course!.id,
-        );
-        setState(() {
-          _model.selectedSectionName = _model.defaultSectionName;
-          _model.selectedCourseName = _model.defaultCourseName;
-          _model.uploadedPhoto = widget.studentToEdit!.photoUrl;
-          _model.selectedYear = widget.studentToEdit!.yearGraduated;
-        });
+        if (widget.studentToEdit != null) {
+          setState(() {
+            _model.firstNameEditController?.text =
+                widget.studentToEdit!.firstName;
+          });
+          setState(() {
+            _model.middleNameEditController?.text =
+                widget.studentToEdit!.middleName;
+          });
+          setState(() {
+            _model.lastNameEditController?.text =
+                widget.studentToEdit!.lastName;
+          });
+          _model.defaultSectionName = await actions.getSectionNameByReference(
+            widget.studentToEdit!.section!.id,
+          );
+          _model.defaultCourseName = await actions.getCourseNameByReference(
+            widget.studentToEdit!.course!.id,
+          );
+          setState(() {
+            _model.sectionDropdownValueController?.value =
+                _model.defaultSectionName!;
+          });
+          setState(() {
+            _model.courseDropdownValueController?.value =
+                _model.defaultCourseName!;
+          });
+          setState(() {
+            _model.yearGraduatedDropdownValueController?.value =
+                widget.studentToEdit!.yearGraduated.toString();
+          });
+          setState(() {
+            _model.selectedSectionName = _model.defaultSectionName;
+            _model.selectedCourseName = _model.defaultCourseName;
+            _model.uploadedPhoto = widget.studentToEdit!.photoUrl;
+            _model.selectedYear = widget.studentToEdit!.yearGraduated;
+          });
+          return;
+        } else {
+          return;
+        }
+      } else {
+        context.pushNamed('YearBooksPage');
+
+        return;
       }
     });
 
@@ -148,7 +170,7 @@ class _CreateStudentWidgetState extends State<CreateStudentWidget> {
                         EdgeInsetsDirectional.fromSTEB(24.0, 0.0, 0.0, 0.0),
                     child: Text(
                       FFLocalizations.of(context).getText(
-                        'ag8qp93r' /* Edit Section Details */,
+                        'ag8qp93r' /* Edit Student Details */,
                       ),
                       style:
                           FlutterFlowTheme.of(context).headlineMedium.override(
@@ -647,49 +669,72 @@ class _CreateStudentWidgetState extends State<CreateStudentWidget> {
                     Padding(
                       padding:
                           EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 12.0),
-                      child: FlutterFlowDropDown<String>(
-                        controller: _model.sectionDropdownValueController ??=
-                            FormFieldController<String>(
-                          _model.sectionDropdownValue ??=
-                              _model.selectedSectionName,
-                        ),
-                        options: _model.sectionList,
-                        onChanged: (val) async {
-                          setState(() => _model.sectionDropdownValue = val);
-                          logFirebaseEvent(
-                              'CREATE_STUDENT_sectionDropdown_ON_FORM_W');
-                          _model.selectedSectionReference =
-                              await actions.getSectionReferenceByName(
-                            _model.sectionDropdownValue!,
-                          );
-                          setState(() {
-                            _model.selectedSection =
-                                _model.selectedSectionReference;
-                          });
+                      child: FutureBuilder<List<SectionRecord>>(
+                        future: querySectionRecordOnce(),
+                        builder: (context, snapshot) {
+                          // Customize what your widget looks like when it's loading.
+                          if (!snapshot.hasData) {
+                            return Center(
+                              child: SizedBox(
+                                width: 50.0,
+                                height: 50.0,
+                                child: CircularProgressIndicator(
+                                  color: FlutterFlowTheme.of(context).success,
+                                ),
+                              ),
+                            );
+                          }
+                          List<SectionRecord> sectionDropdownSectionRecordList =
+                              snapshot.data!;
+                          return FlutterFlowDropDown<String>(
+                            controller:
+                                _model.sectionDropdownValueController ??=
+                                    FormFieldController<String>(null),
+                            options: sectionDropdownSectionRecordList
+                                .map((e) => e.name)
+                                .toList(),
+                            onChanged: (val) async {
+                              setState(() => _model.sectionDropdownValue = val);
+                              logFirebaseEvent(
+                                  'CREATE_STUDENT_sectionDropdown_ON_FORM_W');
+                              _model.selectedSectionReference =
+                                  await actions.getSectionReferenceByName(
+                                _model.sectionDropdownValue!,
+                              );
+                              setState(() {
+                                _model.selectedSection =
+                                    _model.selectedSectionReference;
+                              });
 
-                          setState(() {});
+                              setState(() {});
+                            },
+                            width: double.infinity,
+                            height: 56.0,
+                            searchHintTextStyle: TextStyle(),
+                            textStyle: FlutterFlowTheme.of(context).bodyMedium,
+                            hintText: FFLocalizations.of(context).getText(
+                              '8ti3m89p' /* Select Section... */,
+                            ),
+                            searchHintText: FFLocalizations.of(context).getText(
+                              '8067k2sc' /* Search section... */,
+                            ),
+                            icon: Icon(
+                              Icons.keyboard_arrow_down_rounded,
+                              color: FlutterFlowTheme.of(context).secondaryText,
+                              size: 15.0,
+                            ),
+                            fillColor: FlutterFlowTheme.of(context)
+                                .secondaryBackground,
+                            elevation: 2.0,
+                            borderColor: FlutterFlowTheme.of(context).lineColor,
+                            borderWidth: 2.0,
+                            borderRadius: 8.0,
+                            margin: EdgeInsetsDirectional.fromSTEB(
+                                20.0, 4.0, 12.0, 4.0),
+                            hidesUnderline: true,
+                            isSearchable: true,
+                          );
                         },
-                        width: double.infinity,
-                        height: 56.0,
-                        textStyle: FlutterFlowTheme.of(context).bodyMedium,
-                        hintText: FFLocalizations.of(context).getText(
-                          '8ti3m89p' /* Select Section */,
-                        ),
-                        icon: Icon(
-                          Icons.keyboard_arrow_down_rounded,
-                          color: FlutterFlowTheme.of(context).secondaryText,
-                          size: 15.0,
-                        ),
-                        fillColor:
-                            FlutterFlowTheme.of(context).secondaryBackground,
-                        elevation: 2.0,
-                        borderColor: FlutterFlowTheme.of(context).lineColor,
-                        borderWidth: 2.0,
-                        borderRadius: 8.0,
-                        margin: EdgeInsetsDirectional.fromSTEB(
-                            20.0, 4.0, 12.0, 4.0),
-                        hidesUnderline: true,
-                        isSearchable: false,
                       ),
                     ),
                     Padding(
@@ -716,9 +761,13 @@ class _CreateStudentWidgetState extends State<CreateStudentWidget> {
                         },
                         width: double.infinity,
                         height: 56.0,
+                        searchHintTextStyle: TextStyle(),
                         textStyle: FlutterFlowTheme.of(context).bodyMedium,
                         hintText: FFLocalizations.of(context).getText(
-                          'wlcnd53o' /* Select Year Graduated */,
+                          'wlcnd53o' /* Select Year Graduated... */,
+                        ),
+                        searchHintText: FFLocalizations.of(context).getText(
+                          'geui8t55' /* Select Year Graduated... */,
                         ),
                         icon: Icon(
                           Icons.keyboard_arrow_down_rounded,
@@ -734,55 +783,77 @@ class _CreateStudentWidgetState extends State<CreateStudentWidget> {
                         margin: EdgeInsetsDirectional.fromSTEB(
                             20.0, 4.0, 12.0, 4.0),
                         hidesUnderline: true,
-                        isSearchable: false,
+                        isSearchable: true,
                       ),
                     ),
                     Padding(
                       padding:
                           EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 12.0),
-                      child: FlutterFlowDropDown<String>(
-                        controller: _model.courseDropdownValueController ??=
-                            FormFieldController<String>(
-                          _model.courseDropdownValue ??=
-                              _model.selectedCourseName,
-                        ),
-                        options: _model.courseList,
-                        onChanged: (val) async {
-                          setState(() => _model.courseDropdownValue = val);
-                          logFirebaseEvent(
-                              'CREATE_STUDENT_courseDropdown_ON_FORM_WI');
-                          _model.selectedCourseReference =
-                              await actions.getCourseReferenceByName(
-                            _model.courseDropdownValue!,
-                          );
-                          setState(() {
-                            _model.selectedCourse =
-                                _model.selectedCourseReference;
-                          });
+                      child: FutureBuilder<List<CourseRecord>>(
+                        future: queryCourseRecordOnce(),
+                        builder: (context, snapshot) {
+                          // Customize what your widget looks like when it's loading.
+                          if (!snapshot.hasData) {
+                            return Center(
+                              child: SizedBox(
+                                width: 50.0,
+                                height: 50.0,
+                                child: CircularProgressIndicator(
+                                  color: FlutterFlowTheme.of(context).success,
+                                ),
+                              ),
+                            );
+                          }
+                          List<CourseRecord> courseDropdownCourseRecordList =
+                              snapshot.data!;
+                          return FlutterFlowDropDown<String>(
+                            controller: _model.courseDropdownValueController ??=
+                                FormFieldController<String>(null),
+                            options: courseDropdownCourseRecordList
+                                .map((e) => e.name)
+                                .toList(),
+                            onChanged: (val) async {
+                              setState(() => _model.courseDropdownValue = val);
+                              logFirebaseEvent(
+                                  'CREATE_STUDENT_courseDropdown_ON_FORM_WI');
+                              _model.selectedCourseReference =
+                                  await actions.getCourseReferenceByName(
+                                _model.courseDropdownValue!,
+                              );
+                              setState(() {
+                                _model.selectedCourse =
+                                    _model.selectedCourseReference;
+                              });
 
-                          setState(() {});
+                              setState(() {});
+                            },
+                            width: double.infinity,
+                            height: 56.0,
+                            searchHintTextStyle: TextStyle(),
+                            textStyle: FlutterFlowTheme.of(context).bodyMedium,
+                            hintText: FFLocalizations.of(context).getText(
+                              '3el5g9y2' /* Select Course... */,
+                            ),
+                            searchHintText: FFLocalizations.of(context).getText(
+                              'f63iobir' /* Search Course... */,
+                            ),
+                            icon: Icon(
+                              Icons.keyboard_arrow_down_rounded,
+                              color: FlutterFlowTheme.of(context).secondaryText,
+                              size: 15.0,
+                            ),
+                            fillColor: FlutterFlowTheme.of(context)
+                                .secondaryBackground,
+                            elevation: 2.0,
+                            borderColor: FlutterFlowTheme.of(context).lineColor,
+                            borderWidth: 2.0,
+                            borderRadius: 8.0,
+                            margin: EdgeInsetsDirectional.fromSTEB(
+                                20.0, 4.0, 12.0, 4.0),
+                            hidesUnderline: true,
+                            isSearchable: true,
+                          );
                         },
-                        width: double.infinity,
-                        height: 56.0,
-                        textStyle: FlutterFlowTheme.of(context).bodyMedium,
-                        hintText: FFLocalizations.of(context).getText(
-                          '3el5g9y2' /* Select Course */,
-                        ),
-                        icon: Icon(
-                          Icons.keyboard_arrow_down_rounded,
-                          color: FlutterFlowTheme.of(context).secondaryText,
-                          size: 15.0,
-                        ),
-                        fillColor:
-                            FlutterFlowTheme.of(context).secondaryBackground,
-                        elevation: 2.0,
-                        borderColor: FlutterFlowTheme.of(context).lineColor,
-                        borderWidth: 2.0,
-                        borderRadius: 8.0,
-                        margin: EdgeInsetsDirectional.fromSTEB(
-                            20.0, 4.0, 12.0, 4.0),
-                        hidesUnderline: true,
-                        isSearchable: false,
                       ),
                     ),
                   ],
@@ -874,10 +945,8 @@ class _CreateStudentWidgetState extends State<CreateStudentWidget> {
                                     email: _model.emailEditController.text,
                                     displayName:
                                         '${_model.firstNameEditController.text} ${_model.lastNameEditController.text}',
-                                    photoUrl: _model.uploadedFileUrl,
-                                    studentProfile:
-                                        _model.createdStudent!.reference,
                                     isAdmin: false,
+                                    photoUrl: _model.uploadedFileUrl,
                                   ),
                                   'created_time': FieldValue.serverTimestamp(),
                                 };

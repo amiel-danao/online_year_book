@@ -285,6 +285,15 @@ class _EditProfilePhotoWidgetState extends State<EditProfilePhotoWidget> {
                                 );
                                 await currentUserReference!
                                     .update(usersUpdateData);
+                                if (currentUserDocument?.studentProfile !=
+                                    null) {
+                                  final studentsUpdateData =
+                                      createStudentsRecordData(
+                                    photoUrl: _model.uploadedFileUrl,
+                                  );
+                                  await currentUserDocument!.studentProfile!
+                                      .update(studentsUpdateData);
+                                }
                                 Navigator.pop(context);
                               },
                               text: FFLocalizations.of(context).getText(

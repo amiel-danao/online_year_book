@@ -83,7 +83,15 @@ class _StudentsPageWidgetState extends State<StudentsPageWidget>
 
     logFirebaseEvent('screen_view',
         parameters: {'screen_name': 'studentsPage'});
-    _model.searchFieldController ??= TextEditingController();
+    // On page load action.
+    SchedulerBinding.instance.addPostFrameCallback((_) async {
+      logFirebaseEvent('STUDENTS_studentsPage_ON_INIT_STATE');
+      _model.years = await actions.generateYears();
+      setState(() {
+        _model.yearList = _model.years!.toList().cast<String>();
+      });
+    });
+
     setupAnimations(
       animationsMap.values.where((anim) =>
           anim.trigger == AnimationTrigger.onActionTrigger ||
@@ -191,267 +199,223 @@ class _StudentsPageWidgetState extends State<StudentsPageWidget>
                       ),
                     ),
                   Expanded(
-                    flex: 10,
-                    child: SingleChildScrollView(
-                      primary: false,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
-                                12.0, 1.0, 0.0, 0.0),
-                            child: Container(
-                              width: double.infinity,
-                              decoration: BoxDecoration(
-                                color: FlutterFlowTheme.of(context)
-                                    .primaryBackground,
-                              ),
-                              alignment: AlignmentDirectional(-1.0, 0.0),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.max,
-                                children: [
-                                  Expanded(
-                                    flex: 7,
-                                    child: Padding(
-                                      padding: EdgeInsetsDirectional.fromSTEB(
-                                          16.0, 16.0, 0.0, 16.0),
-                                      child: Text(
-                                        FFLocalizations.of(context).getText(
-                                          '8jlklje5' /* Students */,
-                                        ),
-                                        textAlign: TextAlign.start,
-                                        style: FlutterFlowTheme.of(context)
-                                            .displaySmall,
-                                      ).animateOnPageLoad(animationsMap[
-                                          'textOnPageLoadAnimation1']!),
-                                    ),
-                                  ),
-                                  if (responsiveVisibility(
-                                    context: context,
-                                    tabletLandscape: false,
-                                    desktop: false,
-                                  ))
-                                    Padding(
-                                      padding: EdgeInsetsDirectional.fromSTEB(
-                                          0.0, 0.0, 24.0, 0.0),
-                                      child: FlutterFlowIconButton(
-                                        borderColor: Colors.transparent,
-                                        borderRadius: 30.0,
-                                        borderWidth: 1.0,
-                                        buttonSize: 60.0,
-                                        icon: Icon(
-                                          Icons.search_rounded,
-                                          color: FlutterFlowTheme.of(context)
-                                              .primaryText,
-                                          size: 30.0,
-                                        ),
-                                        onPressed: () async {
-                                          logFirebaseEvent(
-                                              'STUDENTS_search_rounded_ICN_ON_TAP');
-
-                                          context.pushNamed(
-                                            'searchPage',
-                                            extra: <String, dynamic>{
-                                              kTransitionInfoKey:
-                                                  TransitionInfo(
-                                                hasTransition: true,
-                                                transitionType:
-                                                    PageTransitionType
-                                                        .bottomToTop,
-                                                duration:
-                                                    Duration(milliseconds: 250),
-                                              ),
-                                            },
-                                          );
-                                        },
-                                      ),
-                                    ),
-                                  FFButtonWidget(
-                                    onPressed: () async {
-                                      logFirebaseEvent(
-                                          'STUDENTS_NEW_STUDENT_BTN_ON_TAP');
-
-                                      context.pushNamed(
-                                        'CreateStudent',
-                                        extra: <String, dynamic>{
-                                          kTransitionInfoKey: TransitionInfo(
-                                            hasTransition: true,
-                                            transitionType:
-                                                PageTransitionType.rightToLeft,
-                                          ),
-                                        },
-                                      );
-                                    },
-                                    text: FFLocalizations.of(context).getText(
-                                      'pckadi4b' /* New Student */,
-                                    ),
-                                    icon: Icon(
-                                      Icons.add,
-                                      size: 15.0,
-                                    ),
-                                    options: FFButtonOptions(
-                                      height: 40.0,
-                                      padding: EdgeInsetsDirectional.fromSTEB(
-                                          24.0, 0.0, 24.0, 0.0),
-                                      iconPadding:
-                                          EdgeInsetsDirectional.fromSTEB(
-                                              0.0, 0.0, 0.0, 0.0),
-                                      color:
-                                          FlutterFlowTheme.of(context).primary,
-                                      textStyle: FlutterFlowTheme.of(context)
-                                          .titleSmall
-                                          .override(
-                                            fontFamily:
-                                                FlutterFlowTheme.of(context)
-                                                    .titleSmallFamily,
-                                            color: Colors.white,
-                                            useGoogleFonts: GoogleFonts.asMap()
-                                                .containsKey(
-                                                    FlutterFlowTheme.of(context)
-                                                        .titleSmallFamily),
-                                          ),
-                                      elevation: 3.0,
-                                      borderSide: BorderSide(
-                                        color: Colors.transparent,
-                                        width: 1.0,
-                                      ),
-                                      borderRadius: BorderRadius.circular(8.0),
-                                    ),
-                                  ),
-                                ],
-                              ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.max,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: EdgeInsetsDirectional.fromSTEB(
+                              12.0, 1.0, 0.0, 0.0),
+                          child: Container(
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              color: FlutterFlowTheme.of(context)
+                                  .primaryBackground,
                             ),
-                          ),
-                          Row(
-                            mainAxisSize: MainAxisSize.max,
-                            children: [
-                              if (responsiveVisibility(
-                                context: context,
-                                phone: false,
-                                tablet: false,
-                              ))
+                            alignment: AlignmentDirectional(-1.0, 0.0),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.max,
+                              children: [
                                 Expanded(
-                                  flex: 4,
+                                  flex: 7,
                                   child: Padding(
                                     padding: EdgeInsetsDirectional.fromSTEB(
-                                        0.0, 8.0, 16.0, 8.0),
-                                    child: TextFormField(
-                                      controller: _model.searchFieldController,
-                                      obscureText: false,
-                                      decoration: InputDecoration(
-                                        labelText:
-                                            FFLocalizations.of(context).getText(
-                                          '9iuss6gl' /* Search for your students... */,
-                                        ),
-                                        labelStyle: FlutterFlowTheme.of(context)
-                                            .bodySmall,
-                                        hintStyle: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .override(
-                                              fontFamily: 'Lexend Deca',
-                                              color: Color(0xFF57636C),
-                                              fontSize: 14.0,
-                                              fontWeight: FontWeight.normal,
-                                              useGoogleFonts: GoogleFonts
-                                                      .asMap()
-                                                  .containsKey(
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .bodyMediumFamily),
-                                            ),
-                                        enabledBorder: OutlineInputBorder(
-                                          borderSide: BorderSide(
-                                            color: FlutterFlowTheme.of(context)
-                                                .lineColor,
-                                            width: 2.0,
-                                          ),
-                                          borderRadius:
-                                              BorderRadius.circular(40.0),
-                                        ),
-                                        focusedBorder: OutlineInputBorder(
-                                          borderSide: BorderSide(
-                                            color: Color(0x00000000),
-                                            width: 2.0,
-                                          ),
-                                          borderRadius:
-                                              BorderRadius.circular(40.0),
-                                        ),
-                                        errorBorder: OutlineInputBorder(
-                                          borderSide: BorderSide(
-                                            color: Color(0x00000000),
-                                            width: 2.0,
-                                          ),
-                                          borderRadius:
-                                              BorderRadius.circular(40.0),
-                                        ),
-                                        focusedErrorBorder: OutlineInputBorder(
-                                          borderSide: BorderSide(
-                                            color: Color(0x00000000),
-                                            width: 2.0,
-                                          ),
-                                          borderRadius:
-                                              BorderRadius.circular(40.0),
-                                        ),
-                                        filled: true,
-                                        fillColor: FlutterFlowTheme.of(context)
-                                            .secondaryBackground,
-                                        contentPadding:
-                                            EdgeInsetsDirectional.fromSTEB(
-                                                24.0, 12.0, 20.0, 12.0),
-                                        prefixIcon: Icon(
-                                          Icons.search_rounded,
-                                          color: FlutterFlowTheme.of(context)
-                                              .secondaryText,
-                                        ),
+                                        16.0, 16.0, 0.0, 16.0),
+                                    child: Text(
+                                      FFLocalizations.of(context).getText(
+                                        '8jlklje5' /* Students */,
                                       ),
+                                      textAlign: TextAlign.start,
                                       style: FlutterFlowTheme.of(context)
-                                          .bodyMedium,
-                                      validator: _model
-                                          .searchFieldControllerValidator
-                                          .asValidator(context),
-                                    ),
+                                          .displaySmall,
+                                    ).animateOnPageLoad(animationsMap[
+                                        'textOnPageLoadAnimation1']!),
                                   ),
                                 ),
-                              FlutterFlowDropDown<String>(
-                                controller:
-                                    _model.courseDropDownValueController ??=
-                                        FormFieldController<String>(null),
-                                options: <String>[],
-                                onChanged: (val) => setState(
-                                    () => _model.courseDropDownValue = val),
-                                width: 300.0,
-                                height: 50.0,
-                                textStyle:
-                                    FlutterFlowTheme.of(context).bodyMedium,
-                                hintText: FFLocalizations.of(context).getText(
-                                  'tz0n8o9w' /* Filter by course... */,
+                                if (responsiveVisibility(
+                                  context: context,
+                                  tabletLandscape: false,
+                                  desktop: false,
+                                ))
+                                  Padding(
+                                    padding: EdgeInsetsDirectional.fromSTEB(
+                                        0.0, 0.0, 24.0, 0.0),
+                                    child: FlutterFlowIconButton(
+                                      borderColor: Colors.transparent,
+                                      borderRadius: 30.0,
+                                      borderWidth: 1.0,
+                                      buttonSize: 60.0,
+                                      icon: Icon(
+                                        Icons.search_rounded,
+                                        color: FlutterFlowTheme.of(context)
+                                            .primaryText,
+                                        size: 30.0,
+                                      ),
+                                      onPressed: () async {
+                                        logFirebaseEvent(
+                                            'STUDENTS_search_rounded_ICN_ON_TAP');
+
+                                        context.pushNamed(
+                                          'searchPage',
+                                          extra: <String, dynamic>{
+                                            kTransitionInfoKey: TransitionInfo(
+                                              hasTransition: true,
+                                              transitionType: PageTransitionType
+                                                  .bottomToTop,
+                                              duration:
+                                                  Duration(milliseconds: 250),
+                                            ),
+                                          },
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                FFButtonWidget(
+                                  onPressed: () async {
+                                    logFirebaseEvent(
+                                        'STUDENTS_NEW_STUDENT_BTN_ON_TAP');
+
+                                    context.pushNamed(
+                                      'CreateStudent',
+                                      extra: <String, dynamic>{
+                                        kTransitionInfoKey: TransitionInfo(
+                                          hasTransition: true,
+                                          transitionType:
+                                              PageTransitionType.rightToLeft,
+                                        ),
+                                      },
+                                    );
+                                  },
+                                  text: FFLocalizations.of(context).getText(
+                                    'pckadi4b' /* New Student */,
+                                  ),
+                                  icon: Icon(
+                                    Icons.add,
+                                    size: 15.0,
+                                  ),
+                                  options: FFButtonOptions(
+                                    height: 40.0,
+                                    padding: EdgeInsetsDirectional.fromSTEB(
+                                        24.0, 0.0, 24.0, 0.0),
+                                    iconPadding: EdgeInsetsDirectional.fromSTEB(
+                                        0.0, 0.0, 0.0, 0.0),
+                                    color: FlutterFlowTheme.of(context).primary,
+                                    textStyle: FlutterFlowTheme.of(context)
+                                        .titleSmall
+                                        .override(
+                                          fontFamily:
+                                              FlutterFlowTheme.of(context)
+                                                  .titleSmallFamily,
+                                          color: Colors.white,
+                                          useGoogleFonts: GoogleFonts.asMap()
+                                              .containsKey(
+                                                  FlutterFlowTheme.of(context)
+                                                      .titleSmallFamily),
+                                        ),
+                                    elevation: 3.0,
+                                    borderSide: BorderSide(
+                                      color: Colors.transparent,
+                                      width: 1.0,
+                                    ),
+                                    borderRadius: BorderRadius.circular(8.0),
+                                  ),
                                 ),
-                                icon: Icon(
-                                  Icons.keyboard_arrow_down_rounded,
-                                  color: FlutterFlowTheme.of(context)
-                                      .secondaryText,
-                                  size: 24.0,
-                                ),
-                                fillColor: FlutterFlowTheme.of(context)
-                                    .secondaryBackground,
-                                elevation: 2.0,
-                                borderColor:
-                                    FlutterFlowTheme.of(context).alternate,
-                                borderWidth: 2.0,
-                                borderRadius: 8.0,
-                                margin: EdgeInsetsDirectional.fromSTEB(
-                                    16.0, 4.0, 16.0, 4.0),
-                                hidesUnderline: true,
-                                isSearchable: false,
+                              ],
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: EdgeInsetsDirectional.fromSTEB(
+                              20.0, 0.0, 20.0, 0.0),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.max,
+                            children: [
+                              FutureBuilder<List<CourseRecord>>(
+                                future: queryCourseRecordOnce(),
+                                builder: (context, snapshot) {
+                                  // Customize what your widget looks like when it's loading.
+                                  if (!snapshot.hasData) {
+                                    return Center(
+                                      child: SizedBox(
+                                        width: 50.0,
+                                        height: 50.0,
+                                        child: CircularProgressIndicator(
+                                          color: FlutterFlowTheme.of(context)
+                                              .success,
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                  List<CourseRecord>
+                                      courseDropDownCourseRecordList =
+                                      snapshot.data!;
+                                  return FlutterFlowDropDown<String>(
+                                    controller:
+                                        _model.courseDropDownValueController ??=
+                                            FormFieldController<String>(null),
+                                    options: <String>[],
+                                    onChanged: (val) async {
+                                      setState(() =>
+                                          _model.courseDropDownValue = val);
+                                      logFirebaseEvent(
+                                          'STUDENTS_courseDropDown_ON_FORM_WIDGET_S');
+                                      _model.course = await actions
+                                          .getCourseReferenceByName(
+                                        _model.courseDropDownValue!,
+                                      );
+                                      setState(() {
+                                        _model.selectedCourse = _model.course;
+                                      });
+
+                                      setState(() {});
+                                    },
+                                    width: 300.0,
+                                    height: 50.0,
+                                    textStyle:
+                                        FlutterFlowTheme.of(context).bodyMedium,
+                                    hintText:
+                                        FFLocalizations.of(context).getText(
+                                      'tz0n8o9w' /* Filter by course... */,
+                                    ),
+                                    icon: Icon(
+                                      Icons.keyboard_arrow_down_rounded,
+                                      color: FlutterFlowTheme.of(context)
+                                          .secondaryText,
+                                      size: 24.0,
+                                    ),
+                                    fillColor: FlutterFlowTheme.of(context)
+                                        .secondaryBackground,
+                                    elevation: 2.0,
+                                    borderColor:
+                                        FlutterFlowTheme.of(context).alternate,
+                                    borderWidth: 2.0,
+                                    borderRadius: 8.0,
+                                    margin: EdgeInsetsDirectional.fromSTEB(
+                                        16.0, 4.0, 16.0, 4.0),
+                                    hidesUnderline: true,
+                                    isSearchable: false,
+                                  );
+                                },
                               ),
                               FlutterFlowDropDown<String>(
                                 controller:
                                     _model.schoolYearDropDownValueController ??=
                                         FormFieldController<String>(null),
-                                options: <String>[],
-                                onChanged: (val) => setState(
-                                    () => _model.schoolYearDropDownValue = val),
+                                options: _model.yearList,
+                                onChanged: (val) async {
+                                  setState(() =>
+                                      _model.schoolYearDropDownValue = val);
+                                  logFirebaseEvent(
+                                      'STUDENTS_schoolYearDropDown_ON_FORM_WIDG');
+                                  _model.yearInt = await actions.stringToInt(
+                                    _model.schoolYearDropDownValue!,
+                                  );
+                                  setState(() {
+                                    _model.selectedYear = _model.yearInt;
+                                  });
+
+                                  setState(() {});
+                                },
                                 width: 300.0,
                                 height: 50.0,
                                 textStyle:
@@ -479,64 +443,95 @@ class _StudentsPageWidgetState extends State<StudentsPageWidget>
                               ),
                             ],
                           ),
-                          if (responsiveVisibility(
-                            context: context,
-                            tablet: false,
-                            tabletLandscape: false,
-                            desktop: false,
-                          ))
-                            Container(
-                              width: double.infinity,
-                              height: 34.0,
-                              decoration: BoxDecoration(
+                        ),
+                        if (responsiveVisibility(
+                          context: context,
+                          tablet: false,
+                          tabletLandscape: false,
+                          desktop: false,
+                        ))
+                          Container(
+                            width: double.infinity,
+                            height: 34.0,
+                            decoration: BoxDecoration(
+                              color: FlutterFlowTheme.of(context)
+                                  .primaryBackground,
+                            ),
+                          ),
+                        Padding(
+                          padding: EdgeInsetsDirectional.fromSTEB(
+                              16.0, 12.0, 16.0, 44.0),
+                          child: Container(
+                            width: MediaQuery.of(context).size.width * 1.0,
+                            decoration: BoxDecoration(
+                              color: FlutterFlowTheme.of(context)
+                                  .secondaryBackground,
+                              boxShadow: [
+                                BoxShadow(
+                                  blurRadius: 4.0,
+                                  color: Color(0x1F000000),
+                                  offset: Offset(0.0, 2.0),
+                                )
+                              ],
+                              borderRadius: BorderRadius.circular(8.0),
+                              border: Border.all(
                                 color: FlutterFlowTheme.of(context)
                                     .primaryBackground,
+                                width: 1.0,
                               ),
                             ),
-                          Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
-                                16.0, 12.0, 16.0, 44.0),
-                            child: Container(
-                              width: MediaQuery.of(context).size.width * 1.0,
-                              decoration: BoxDecoration(
-                                color: FlutterFlowTheme.of(context)
-                                    .secondaryBackground,
-                                boxShadow: [
-                                  BoxShadow(
-                                    blurRadius: 4.0,
-                                    color: Color(0x1F000000),
-                                    offset: Offset(0.0, 2.0),
-                                  )
-                                ],
-                                borderRadius: BorderRadius.circular(8.0),
-                                border: Border.all(
-                                  color: FlutterFlowTheme.of(context)
-                                      .primaryBackground,
-                                  width: 1.0,
-                                ),
-                              ),
-                              child: Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
-                                    0.0, 12.0, 0.0, 12.0),
-                                child: SingleChildScrollView(
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.max,
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
-                                            12.0, 12.0, 12.0, 0.0),
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.max,
-                                          children: [
+                            child: Padding(
+                              padding: EdgeInsetsDirectional.fromSTEB(
+                                  0.0, 12.0, 0.0, 12.0),
+                              child: SingleChildScrollView(
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.max,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Padding(
+                                      padding: EdgeInsetsDirectional.fromSTEB(
+                                          12.0, 12.0, 12.0, 0.0),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.max,
+                                        children: [
+                                          Expanded(
+                                            flex: 1,
+                                            child: Text(
+                                              FFLocalizations.of(context)
+                                                  .getText(
+                                                '5mtplc2u' /* Last name */,
+                                              ),
+                                              textAlign: TextAlign.start,
+                                              style:
+                                                  FlutterFlowTheme.of(context)
+                                                      .bodySmall,
+                                            ),
+                                          ),
+                                          Expanded(
+                                            flex: 1,
+                                            child: Text(
+                                              FFLocalizations.of(context)
+                                                  .getText(
+                                                'cz5y629p' /* First name */,
+                                              ),
+                                              textAlign: TextAlign.start,
+                                              style:
+                                                  FlutterFlowTheme.of(context)
+                                                      .bodySmall,
+                                            ),
+                                          ),
+                                          if (responsiveVisibility(
+                                            context: context,
+                                            phone: false,
+                                            tablet: false,
+                                          ))
                                             Expanded(
                                               flex: 1,
                                               child: Text(
                                                 FFLocalizations.of(context)
                                                     .getText(
-                                                  '5mtplc2u' /* Last name */,
+                                                  'xsqhz5g4' /* Middle name */,
                                                 ),
                                                 textAlign: TextAlign.start,
                                                 style:
@@ -544,103 +539,104 @@ class _StudentsPageWidgetState extends State<StudentsPageWidget>
                                                         .bodySmall,
                                               ),
                                             ),
+                                          if (responsiveVisibility(
+                                            context: context,
+                                            phone: false,
+                                          ))
                                             Expanded(
                                               flex: 1,
                                               child: Text(
                                                 FFLocalizations.of(context)
                                                     .getText(
-                                                  'cz5y629p' /* First name */,
+                                                  'xkijgi68' /* Course */,
                                                 ),
-                                                textAlign: TextAlign.start,
                                                 style:
                                                     FlutterFlowTheme.of(context)
                                                         .bodySmall,
                                               ),
                                             ),
-                                            if (responsiveVisibility(
-                                              context: context,
-                                              phone: false,
-                                              tablet: false,
-                                            ))
-                                              Expanded(
-                                                flex: 1,
-                                                child: Text(
-                                                  FFLocalizations.of(context)
-                                                      .getText(
-                                                    'xsqhz5g4' /* Middle name */,
-                                                  ),
-                                                  textAlign: TextAlign.start,
-                                                  style: FlutterFlowTheme.of(
-                                                          context)
-                                                      .bodySmall,
+                                          if (responsiveVisibility(
+                                            context: context,
+                                            phone: false,
+                                            tablet: false,
+                                          ))
+                                            Expanded(
+                                              flex: 1,
+                                              child: Text(
+                                                FFLocalizations.of(context)
+                                                    .getText(
+                                                  'dtsi2m5j' /* Year Graduated */,
                                                 ),
+                                                style:
+                                                    FlutterFlowTheme.of(context)
+                                                        .bodySmall,
                                               ),
-                                            if (responsiveVisibility(
-                                              context: context,
-                                              phone: false,
-                                            ))
-                                              Expanded(
-                                                flex: 1,
-                                                child: Text(
-                                                  FFLocalizations.of(context)
-                                                      .getText(
-                                                    'xkijgi68' /* Course */,
-                                                  ),
-                                                  style: FlutterFlowTheme.of(
-                                                          context)
-                                                      .bodySmall,
+                                            ),
+                                          if (responsiveVisibility(
+                                            context: context,
+                                            phone: false,
+                                            tablet: false,
+                                          ))
+                                            Expanded(
+                                              flex: 1,
+                                              child: Text(
+                                                FFLocalizations.of(context)
+                                                    .getText(
+                                                  '3nnaji82' /* Action */,
                                                 ),
+                                                style:
+                                                    FlutterFlowTheme.of(context)
+                                                        .bodySmall,
                                               ),
-                                            if (responsiveVisibility(
-                                              context: context,
-                                              phone: false,
-                                              tablet: false,
-                                            ))
-                                              Expanded(
-                                                flex: 1,
-                                                child: Text(
-                                                  FFLocalizations.of(context)
-                                                      .getText(
-                                                    'dtsi2m5j' /* Year Graduated */,
-                                                  ),
-                                                  style: FlutterFlowTheme.of(
-                                                          context)
-                                                      .bodySmall,
-                                                ),
-                                              ),
-                                            if (responsiveVisibility(
-                                              context: context,
-                                              phone: false,
-                                              tablet: false,
-                                            ))
-                                              Expanded(
-                                                flex: 1,
-                                                child: Text(
-                                                  FFLocalizations.of(context)
-                                                      .getText(
-                                                    '3nnaji82' /* Action */,
-                                                  ),
-                                                  style: FlutterFlowTheme.of(
-                                                          context)
-                                                      .bodySmall,
-                                                ),
-                                              ),
-                                          ],
-                                        ),
+                                            ),
+                                        ],
                                       ),
-                                      if (_model.showList)
-                                        Padding(
-                                          padding:
-                                              EdgeInsetsDirectional.fromSTEB(
-                                                  0.0, 16.0, 0.0, 0.0),
-                                          child: PagedListView<
-                                              DocumentSnapshot<Object?>?,
-                                              StudentsRecord>(
-                                            pagingController: () {
-                                              final Query<Object?> Function(
-                                                      Query<Object?>)
-                                                  queryBuilder =
-                                                  (studentsRecord) => studentsRecord
+                                    ),
+                                    Padding(
+                                      padding: EdgeInsetsDirectional.fromSTEB(
+                                          0.0, 16.0, 0.0, 0.0),
+                                      child: PagedListView<
+                                          DocumentSnapshot<Object?>?,
+                                          StudentsRecord>(
+                                        pagingController: () {
+                                          final Query<Object?> Function(
+                                                  Query<Object?>) queryBuilder =
+                                              (studentsRecord) => studentsRecord
+                                                  .where('course',
+                                                      isEqualTo:
+                                                          _model.selectedCourse)
+                                                  .where('year_graduated',
+                                                      isEqualTo:
+                                                          _model.selectedYear)
+                                                  .orderBy('last_name',
+                                                      descending: true);
+                                          if (_model.pagingController != null) {
+                                            final query = queryBuilder(
+                                                StudentsRecord.collection);
+                                            if (query != _model.pagingQuery) {
+                                              // The query has changed
+                                              _model.pagingQuery = query;
+                                              _model.streamSubscriptions
+                                                  .forEach((s) => s?.cancel());
+                                              _model.streamSubscriptions
+                                                  .clear();
+                                              _model.pagingController!
+                                                  .refresh();
+                                            }
+                                            return _model.pagingController!;
+                                          }
+
+                                          _model.pagingController =
+                                              PagingController(
+                                                  firstPageKey: null);
+                                          _model.pagingQuery = queryBuilder(
+                                              StudentsRecord.collection);
+                                          _model.pagingController!
+                                              .addPageRequestListener(
+                                                  (nextPageMarker) {
+                                            queryStudentsRecordPage(
+                                              queryBuilder: (studentsRecord) =>
+                                                  studentsRecord
                                                       .where('course',
                                                           isEqualTo: _model
                                                               .selectedCourse)
@@ -648,637 +644,573 @@ class _StudentsPageWidgetState extends State<StudentsPageWidget>
                                                           isEqualTo: _model
                                                               .selectedYear)
                                                       .orderBy('last_name',
-                                                          descending: true);
-                                              if (_model.pagingController !=
-                                                  null) {
-                                                final query = queryBuilder(
-                                                    StudentsRecord.collection);
-                                                if (query !=
-                                                    _model.pagingQuery) {
-                                                  // The query has changed
-                                                  _model.pagingQuery = query;
-                                                  _model.streamSubscriptions
-                                                      .forEach(
-                                                          (s) => s?.cancel());
-                                                  _model.streamSubscriptions
-                                                      .clear();
-                                                  _model.pagingController!
-                                                      .refresh();
-                                                }
-                                                return _model.pagingController!;
-                                              }
-
-                                              _model.pagingController =
-                                                  PagingController(
-                                                      firstPageKey: null);
-                                              _model.pagingQuery = queryBuilder(
-                                                  StudentsRecord.collection);
+                                                          descending: true),
+                                              nextPageMarker: nextPageMarker,
+                                              pageSize: 25,
+                                              isStream: true,
+                                            ).then((page) {
                                               _model.pagingController!
-                                                  .addPageRequestListener(
-                                                      (nextPageMarker) {
-                                                queryStudentsRecordPage(
-                                                  queryBuilder: (studentsRecord) =>
-                                                      studentsRecord
-                                                          .where('course',
-                                                              isEqualTo: _model
-                                                                  .selectedCourse)
-                                                          .where(
-                                                              'year_graduated',
-                                                              isEqualTo: _model
-                                                                  .selectedYear)
-                                                          .orderBy('last_name',
-                                                              descending: true),
-                                                  nextPageMarker:
-                                                      nextPageMarker,
-                                                  pageSize: 25,
-                                                  isStream: true,
-                                                ).then((page) {
-                                                  _model.pagingController!
-                                                      .appendPage(
-                                                    page.data,
-                                                    page.nextPageMarker,
-                                                  );
-                                                  final streamSubscription =
-                                                      page.dataStream
-                                                          ?.listen((data) {
-                                                    data.forEach((item) {
-                                                      final itemIndexes = _model
-                                                          .pagingController!
-                                                          .itemList!
-                                                          .asMap()
-                                                          .map((k, v) =>
-                                                              MapEntry(
-                                                                  v.reference
-                                                                      .id,
-                                                                  k));
-                                                      final index = itemIndexes[
-                                                          item.reference.id];
-                                                      final items = _model
-                                                          .pagingController!
-                                                          .itemList!;
-                                                      if (index != null) {
-                                                        items.replaceRange(
-                                                            index,
-                                                            index + 1,
-                                                            [item]);
-                                                        _model.pagingController!
-                                                            .itemList = {
-                                                          for (var item
-                                                              in items)
-                                                            item.reference: item
-                                                        }.values.toList();
-                                                      }
-                                                    });
-                                                    setState(() {});
-                                                  });
-                                                  _model.streamSubscriptions
-                                                      .add(streamSubscription);
-                                                });
-                                              });
-                                              return _model.pagingController!;
-                                            }(),
-                                            padding: EdgeInsets.zero,
-                                            shrinkWrap: true,
-                                            reverse: false,
-                                            scrollDirection: Axis.vertical,
-                                            builderDelegate:
-                                                PagedChildBuilderDelegate<
-                                                    StudentsRecord>(
-                                              // Customize what your widget looks like when it's loading the first page.
-                                              firstPageProgressIndicatorBuilder:
-                                                  (_) => Center(
-                                                child: SizedBox(
-                                                  width: 50.0,
-                                                  height: 50.0,
-                                                  child:
-                                                      CircularProgressIndicator(
-                                                    color: FlutterFlowTheme.of(
-                                                            context)
-                                                        .success,
-                                                  ),
-                                                ),
-                                              ),
-
-                                              itemBuilder:
-                                                  (context, _, listViewIndex) {
-                                                final listViewStudentsRecord =
+                                                  .appendPage(
+                                                page.data,
+                                                page.nextPageMarker,
+                                              );
+                                              final streamSubscription = page
+                                                  .dataStream
+                                                  ?.listen((data) {
+                                                data.forEach((item) {
+                                                  final itemIndexes = _model
+                                                      .pagingController!
+                                                      .itemList!
+                                                      .asMap()
+                                                      .map((k, v) => MapEntry(
+                                                          v.reference.id, k));
+                                                  final index = itemIndexes[
+                                                      item.reference.id];
+                                                  final items = _model
+                                                      .pagingController!
+                                                      .itemList!;
+                                                  if (index != null) {
+                                                    items.replaceRange(index,
+                                                        index + 1, [item]);
                                                     _model.pagingController!
-                                                            .itemList![
-                                                        listViewIndex];
-                                                return Padding(
-                                                  padding: EdgeInsetsDirectional
-                                                      .fromSTEB(
-                                                          0.0, 0.0, 0.0, 2.0),
-                                                  child: Container(
-                                                    width: double.infinity,
-                                                    decoration: BoxDecoration(
-                                                      color: FlutterFlowTheme
-                                                              .of(context)
-                                                          .secondaryBackground,
-                                                      boxShadow: [
-                                                        BoxShadow(
-                                                          blurRadius: 0.0,
-                                                          color: FlutterFlowTheme
-                                                                  .of(context)
+                                                        .itemList = {
+                                                      for (var item in items)
+                                                        item.reference: item
+                                                    }.values.toList();
+                                                  }
+                                                });
+                                                setState(() {});
+                                              });
+                                              _model.streamSubscriptions
+                                                  .add(streamSubscription);
+                                            });
+                                          });
+                                          return _model.pagingController!;
+                                        }(),
+                                        padding: EdgeInsets.zero,
+                                        shrinkWrap: true,
+                                        reverse: false,
+                                        scrollDirection: Axis.vertical,
+                                        builderDelegate:
+                                            PagedChildBuilderDelegate<
+                                                StudentsRecord>(
+                                          // Customize what your widget looks like when it's loading the first page.
+                                          firstPageProgressIndicatorBuilder:
+                                              (_) => Center(
+                                            child: SizedBox(
+                                              width: 50.0,
+                                              height: 50.0,
+                                              child: CircularProgressIndicator(
+                                                color:
+                                                    FlutterFlowTheme.of(context)
+                                                        .success,
+                                              ),
+                                            ),
+                                          ),
+
+                                          itemBuilder:
+                                              (context, _, listViewIndex) {
+                                            final listViewStudentsRecord =
+                                                _model.pagingController!
+                                                    .itemList![listViewIndex];
+                                            return Padding(
+                                              padding: EdgeInsetsDirectional
+                                                  .fromSTEB(0.0, 0.0, 0.0, 2.0),
+                                              child: Container(
+                                                width: double.infinity,
+                                                decoration: BoxDecoration(
+                                                  color: FlutterFlowTheme.of(
+                                                          context)
+                                                      .secondaryBackground,
+                                                  boxShadow: [
+                                                    BoxShadow(
+                                                      blurRadius: 0.0,
+                                                      color:
+                                                          FlutterFlowTheme.of(
+                                                                  context)
                                                               .lineColor,
-                                                          offset:
-                                                              Offset(0.0, 1.0),
-                                                        )
-                                                      ],
-                                                    ),
-                                                    child: Padding(
-                                                      padding:
-                                                          EdgeInsetsDirectional
-                                                              .fromSTEB(
-                                                                  12.0,
-                                                                  12.0,
-                                                                  12.0,
-                                                                  12.0),
-                                                      child: Row(
-                                                        mainAxisSize:
-                                                            MainAxisSize.max,
-                                                        children: [
-                                                          Expanded(
-                                                            flex: 1,
-                                                            child: Row(
-                                                              mainAxisSize:
-                                                                  MainAxisSize
-                                                                      .max,
-                                                              children: [
-                                                                Padding(
-                                                                  padding: EdgeInsetsDirectional
+                                                      offset: Offset(0.0, 1.0),
+                                                    )
+                                                  ],
+                                                ),
+                                                child: Padding(
+                                                  padding: EdgeInsetsDirectional
+                                                      .fromSTEB(12.0, 12.0,
+                                                          12.0, 12.0),
+                                                  child: Row(
+                                                    mainAxisSize:
+                                                        MainAxisSize.max,
+                                                    children: [
+                                                      Expanded(
+                                                        flex: 1,
+                                                        child: Row(
+                                                          mainAxisSize:
+                                                              MainAxisSize.max,
+                                                          children: [
+                                                            Padding(
+                                                              padding:
+                                                                  EdgeInsetsDirectional
                                                                       .fromSTEB(
                                                                           0.0,
                                                                           0.0,
                                                                           12.0,
                                                                           0.0),
-                                                                  child:
-                                                                      ClipRRect(
-                                                                    borderRadius:
-                                                                        BorderRadius.circular(
-                                                                            12.0),
-                                                                    child:
-                                                                        CachedNetworkImage(
-                                                                      imageUrl:
-                                                                          valueOrDefault<
-                                                                              String>(
-                                                                        listViewStudentsRecord
-                                                                            .photoUrl,
-                                                                        'https://firebasestorage.googleapis.com/v0/b/online-year-book.appspot.com/o/OYG%20LOGO.png?alt=media&token=ad86d63c-396e-4455-991c-3436ea5507a9&_gl=1*1qrxbb6*_ga*NzAzNzIxMjgwLjE2ODQzOTA2OTY.*_ga_CW55HF8NVT*MTY4NjQ4NDA4OS45MC4xLjE2ODY0ODQxNzMuMC4wLjA.',
-                                                                      ),
-                                                                      width:
-                                                                          40.0,
-                                                                      height:
-                                                                          40.0,
-                                                                      fit: BoxFit
-                                                                          .cover,
-                                                                    ),
-                                                                  ),
-                                                                ),
-                                                                Expanded(
-                                                                  child: Column(
-                                                                    mainAxisSize:
-                                                                        MainAxisSize
-                                                                            .max,
-                                                                    crossAxisAlignment:
-                                                                        CrossAxisAlignment
-                                                                            .start,
-                                                                    children: [
-                                                                      AutoSizeText(
-                                                                        listViewStudentsRecord
-                                                                            .lastName
-                                                                            .maybeHandleOverflow(
-                                                                          maxChars:
-                                                                              32,
-                                                                          replacement:
-                                                                              '…',
-                                                                        ),
-                                                                        style: FlutterFlowTheme.of(context)
-                                                                            .titleMedium,
-                                                                      ),
-                                                                      if (responsiveVisibility(
-                                                                        context:
-                                                                            context,
-                                                                        tabletLandscape:
-                                                                            false,
-                                                                        desktop:
-                                                                            false,
-                                                                      ))
-                                                                        Padding(
-                                                                          padding: EdgeInsetsDirectional.fromSTEB(
-                                                                              0.0,
-                                                                              2.0,
-                                                                              0.0,
-                                                                              0.0),
-                                                                          child:
-                                                                              Text(
-                                                                            FFLocalizations.of(context).getText(
-                                                                              'hbvgee7f' /* user@domainname.com */,
-                                                                            ),
-                                                                            style:
-                                                                                FlutterFlowTheme.of(context).bodySmall,
-                                                                          ),
-                                                                        ),
-                                                                    ],
-                                                                  ),
-                                                                ),
-                                                              ],
-                                                            ),
-                                                          ),
-                                                          if (responsiveVisibility(
-                                                            context: context,
-                                                            phone: false,
-                                                            tablet: false,
-                                                          ))
-                                                            Expanded(
-                                                              flex: 1,
-                                                              child: Text(
-                                                                listViewStudentsRecord
-                                                                    .firstName,
-                                                                style: FlutterFlowTheme.of(
-                                                                        context)
-                                                                    .bodyMedium,
-                                                              ),
-                                                            ),
-                                                          if (responsiveVisibility(
-                                                            context: context,
-                                                            phone: false,
-                                                          ))
-                                                            Expanded(
-                                                              flex: 1,
-                                                              child: Text(
-                                                                listViewStudentsRecord
-                                                                    .middleName,
-                                                                style: FlutterFlowTheme.of(
-                                                                        context)
-                                                                    .bodyMedium,
-                                                              ),
-                                                            ),
-                                                          if (responsiveVisibility(
-                                                            context: context,
-                                                            phone: false,
-                                                            tablet: false,
-                                                          ))
-                                                            Expanded(
-                                                              flex: 1,
-                                                              child: StreamBuilder<
-                                                                  CourseRecord>(
-                                                                stream: CourseRecord
-                                                                    .getDocument(
-                                                                        listViewStudentsRecord
-                                                                            .course!),
-                                                                builder: (context,
-                                                                    snapshot) {
-                                                                  // Customize what your widget looks like when it's loading.
-                                                                  if (!snapshot
-                                                                      .hasData) {
-                                                                    return Center(
-                                                                      child:
-                                                                          SizedBox(
-                                                                        width:
-                                                                            50.0,
-                                                                        height:
-                                                                            50.0,
-                                                                        child:
-                                                                            CircularProgressIndicator(
-                                                                          color:
-                                                                              FlutterFlowTheme.of(context).success,
-                                                                        ),
-                                                                      ),
-                                                                    );
-                                                                  }
-                                                                  final textCourseRecord =
-                                                                      snapshot
-                                                                          .data!;
-                                                                  return Text(
-                                                                    textCourseRecord
-                                                                        .name,
-                                                                    style: FlutterFlowTheme.of(
-                                                                            context)
-                                                                        .bodyMedium,
-                                                                  );
-                                                                },
-                                                              ),
-                                                            ),
-                                                          Expanded(
-                                                            flex: 1,
-                                                            child: Text(
-                                                              listViewStudentsRecord
-                                                                  .yearGraduated
-                                                                  .toString(),
-                                                              style: FlutterFlowTheme
-                                                                      .of(context)
-                                                                  .bodyMedium
-                                                                  .override(
-                                                                    fontFamily:
-                                                                        FlutterFlowTheme.of(context)
-                                                                            .bodyMediumFamily,
-                                                                    color: FlutterFlowTheme.of(
-                                                                            context)
-                                                                        .primaryText,
-                                                                    useGoogleFonts: GoogleFonts
-                                                                            .asMap()
-                                                                        .containsKey(
-                                                                            FlutterFlowTheme.of(context).bodyMediumFamily),
-                                                                  ),
-                                                            ),
-                                                          ),
-                                                          Flexible(
-                                                            child:
-                                                                FFButtonWidget(
-                                                              onPressed:
-                                                                  () async {
-                                                                logFirebaseEvent(
-                                                                    'STUDENTS_editStudentButton_ON_TAP');
-
-                                                                context
-                                                                    .pushNamed(
-                                                                  'CreateStudent',
-                                                                  queryParameters:
-                                                                      {
-                                                                    'studentToEdit':
-                                                                        serializeParam(
-                                                                      listViewStudentsRecord,
-                                                                      ParamType
-                                                                          .Document,
-                                                                    ),
-                                                                  }.withoutNulls,
-                                                                  extra: <
-                                                                      String,
-                                                                      dynamic>{
-                                                                    'studentToEdit':
-                                                                        listViewStudentsRecord,
-                                                                    kTransitionInfoKey:
-                                                                        TransitionInfo(
-                                                                      hasTransition:
-                                                                          true,
-                                                                      transitionType:
-                                                                          PageTransitionType
-                                                                              .rightToLeft,
-                                                                    ),
-                                                                  },
-                                                                );
-                                                              },
-                                                              text: FFLocalizations
-                                                                      .of(context)
-                                                                  .getText(
-                                                                'k7iz54bq' /* Edit */,
-                                                              ),
-                                                              icon: Icon(
-                                                                Icons.edit,
-                                                                size: 15.0,
-                                                              ),
-                                                              options:
-                                                                  FFButtonOptions(
-                                                                height: 40.0,
-                                                                padding: EdgeInsetsDirectional
-                                                                    .fromSTEB(
-                                                                        24.0,
-                                                                        0.0,
-                                                                        24.0,
-                                                                        0.0),
-                                                                iconPadding:
-                                                                    EdgeInsetsDirectional
-                                                                        .fromSTEB(
-                                                                            0.0,
-                                                                            0.0,
-                                                                            0.0,
-                                                                            0.0),
-                                                                color: FlutterFlowTheme.of(
-                                                                        context)
-                                                                    .accent4,
-                                                                textStyle: FlutterFlowTheme.of(
-                                                                        context)
-                                                                    .titleSmall
-                                                                    .override(
-                                                                      fontFamily:
-                                                                          FlutterFlowTheme.of(context)
-                                                                              .titleSmallFamily,
-                                                                      color: Colors
-                                                                          .white,
-                                                                      useGoogleFonts: GoogleFonts
-                                                                              .asMap()
-                                                                          .containsKey(
-                                                                              FlutterFlowTheme.of(context).titleSmallFamily),
-                                                                    ),
-                                                                elevation: 3.0,
-                                                                borderSide:
-                                                                    BorderSide(
-                                                                  color: Colors
-                                                                      .transparent,
-                                                                  width: 1.0,
-                                                                ),
+                                                              child: ClipRRect(
                                                                 borderRadius:
                                                                     BorderRadius
                                                                         .circular(
-                                                                            8.0),
+                                                                            12.0),
+                                                                child:
+                                                                    CachedNetworkImage(
+                                                                  imageUrl:
+                                                                      valueOrDefault<
+                                                                          String>(
+                                                                    listViewStudentsRecord
+                                                                        .photoUrl,
+                                                                    'https://firebasestorage.googleapis.com/v0/b/online-year-book.appspot.com/o/OYG%20LOGO.png?alt=media&token=ad86d63c-396e-4455-991c-3436ea5507a9&_gl=1*1qrxbb6*_ga*NzAzNzIxMjgwLjE2ODQzOTA2OTY.*_ga_CW55HF8NVT*MTY4NjQ4NDA4OS45MC4xLjE2ODY0ODQxNzMuMC4wLjA.',
+                                                                  ),
+                                                                  width: 40.0,
+                                                                  height: 40.0,
+                                                                  fit: BoxFit
+                                                                      .cover,
+                                                                ),
                                                               ),
                                                             ),
-                                                          ),
-                                                          FFButtonWidget(
-                                                            onPressed:
-                                                                () async {
-                                                              logFirebaseEvent(
-                                                                  'STUDENTS_PAGE_PAGE_DELETE_BTN_ON_TAP');
-                                                              var _shouldSetState =
-                                                                  false;
-                                                              var confirmDialogResponse =
-                                                                  await showDialog<
-                                                                          bool>(
-                                                                        context:
-                                                                            context,
-                                                                        builder:
-                                                                            (alertDialogContext) {
-                                                                          return AlertDialog(
-                                                                            title:
-                                                                                Text('Confirm delete'),
-                                                                            content:
-                                                                                Text(valueOrDefault<String>(
-                                                                              'Are you sure you want to delete this student?${'${listViewStudentsRecord.lastName} ${listViewStudentsRecord.firstName}'}',
-                                                                              'Are you sure you want to delete this student?',
-                                                                            )),
-                                                                            actions: [
-                                                                              TextButton(
-                                                                                onPressed: () => Navigator.pop(alertDialogContext, false),
-                                                                                child: Text('Cancel'),
-                                                                              ),
-                                                                              TextButton(
-                                                                                onPressed: () => Navigator.pop(alertDialogContext, true),
-                                                                                child: Text('Confirm'),
-                                                                              ),
-                                                                            ],
-                                                                          );
-                                                                        },
-                                                                      ) ??
-                                                                      false;
-                                                              if (confirmDialogResponse) {
-                                                                setState(() {
-                                                                  _model.showList =
-                                                                      false;
-                                                                });
-                                                                _model.deleteStudentResult =
-                                                                    await actions
-                                                                        .deleteStudentAccount(
-                                                                  listViewStudentsRecord
-                                                                      .reference,
-                                                                );
-                                                                _shouldSetState =
-                                                                    true;
-                                                                if (_model
-                                                                        .deleteStudentResult ==
-                                                                    true) {
-                                                                  await listViewStudentsRecord
-                                                                      .reference
-                                                                      .delete();
-                                                                  ScaffoldMessenger.of(
-                                                                          context)
-                                                                      .clearSnackBars();
-                                                                  ScaffoldMessenger.of(
-                                                                          context)
-                                                                      .showSnackBar(
-                                                                    SnackBar(
-                                                                      content:
-                                                                          Text(
-                                                                        'Student was deleted successfully',
-                                                                        style:
-                                                                            TextStyle(
-                                                                          color:
-                                                                              FlutterFlowTheme.of(context).primary,
-                                                                        ),
-                                                                      ),
-                                                                      duration: Duration(
-                                                                          milliseconds:
-                                                                              4000),
-                                                                      backgroundColor:
-                                                                          Colors
-                                                                              .black,
+                                                            Expanded(
+                                                              child: Column(
+                                                                mainAxisSize:
+                                                                    MainAxisSize
+                                                                        .max,
+                                                                crossAxisAlignment:
+                                                                    CrossAxisAlignment
+                                                                        .start,
+                                                                children: [
+                                                                  AutoSizeText(
+                                                                    listViewStudentsRecord
+                                                                        .lastName
+                                                                        .maybeHandleOverflow(
+                                                                      maxChars:
+                                                                          32,
+                                                                      replacement:
+                                                                          '…',
                                                                     ),
-                                                                  );
+                                                                    style: FlutterFlowTheme.of(
+                                                                            context)
+                                                                        .titleMedium,
+                                                                  ),
+                                                                  if (responsiveVisibility(
+                                                                    context:
+                                                                        context,
+                                                                    tabletLandscape:
+                                                                        false,
+                                                                    desktop:
+                                                                        false,
+                                                                  ))
+                                                                    Padding(
+                                                                      padding: EdgeInsetsDirectional.fromSTEB(
+                                                                          0.0,
+                                                                          2.0,
+                                                                          0.0,
+                                                                          0.0),
+                                                                      child:
+                                                                          Text(
+                                                                        FFLocalizations.of(context)
+                                                                            .getText(
+                                                                          'hbvgee7f' /* user@domainname.com */,
+                                                                        ),
+                                                                        style: FlutterFlowTheme.of(context)
+                                                                            .bodySmall,
+                                                                      ),
+                                                                    ),
+                                                                ],
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                      if (responsiveVisibility(
+                                                        context: context,
+                                                        phone: false,
+                                                        tablet: false,
+                                                      ))
+                                                        Expanded(
+                                                          flex: 1,
+                                                          child: Text(
+                                                            listViewStudentsRecord
+                                                                .firstName,
+                                                            style: FlutterFlowTheme
+                                                                    .of(context)
+                                                                .bodyMedium,
+                                                          ),
+                                                        ),
+                                                      if (responsiveVisibility(
+                                                        context: context,
+                                                        phone: false,
+                                                      ))
+                                                        Expanded(
+                                                          flex: 1,
+                                                          child: Text(
+                                                            listViewStudentsRecord
+                                                                .middleName,
+                                                            style: FlutterFlowTheme
+                                                                    .of(context)
+                                                                .bodyMedium,
+                                                          ),
+                                                        ),
+                                                      if (responsiveVisibility(
+                                                        context: context,
+                                                        phone: false,
+                                                        tablet: false,
+                                                      ))
+                                                        Expanded(
+                                                          flex: 1,
+                                                          child: StreamBuilder<
+                                                              CourseRecord>(
+                                                            stream: CourseRecord
+                                                                .getDocument(
+                                                                    listViewStudentsRecord
+                                                                        .course!),
+                                                            builder: (context,
+                                                                snapshot) {
+                                                              // Customize what your widget looks like when it's loading.
+                                                              if (!snapshot
+                                                                  .hasData) {
+                                                                return Center(
+                                                                  child:
+                                                                      SizedBox(
+                                                                    width: 50.0,
+                                                                    height:
+                                                                        50.0,
+                                                                    child:
+                                                                        CircularProgressIndicator(
+                                                                      color: FlutterFlowTheme.of(
+                                                                              context)
+                                                                          .success,
+                                                                    ),
+                                                                  ),
+                                                                );
+                                                              }
+                                                              final textCourseRecord =
+                                                                  snapshot
+                                                                      .data!;
+                                                              return Text(
+                                                                textCourseRecord
+                                                                    .name,
+                                                                style: FlutterFlowTheme.of(
+                                                                        context)
+                                                                    .bodyMedium,
+                                                              );
+                                                            },
+                                                          ),
+                                                        ),
+                                                      Expanded(
+                                                        flex: 1,
+                                                        child: Text(
+                                                          listViewStudentsRecord
+                                                              .yearGraduated
+                                                              .toString(),
+                                                          style: FlutterFlowTheme
+                                                                  .of(context)
+                                                              .bodyMedium
+                                                              .override(
+                                                                fontFamily: FlutterFlowTheme.of(
+                                                                        context)
+                                                                    .bodyMediumFamily,
+                                                                color: FlutterFlowTheme.of(
+                                                                        context)
+                                                                    .primaryText,
+                                                                useGoogleFonts: GoogleFonts
+                                                                        .asMap()
+                                                                    .containsKey(
+                                                                        FlutterFlowTheme.of(context)
+                                                                            .bodyMediumFamily),
+                                                              ),
+                                                        ),
+                                                      ),
+                                                      FFButtonWidget(
+                                                        onPressed: () async {
+                                                          logFirebaseEvent(
+                                                              'STUDENTS_editStudentButton_ON_TAP');
 
-                                                                  context.goNamed(
-                                                                      'studentsPage');
-
-                                                                  setState(() {
-                                                                    _model.showList =
-                                                                        true;
-                                                                  });
-                                                                  if (_shouldSetState)
-                                                                    setState(
-                                                                        () {});
-                                                                  return;
-                                                                } else {
-                                                                  await showDialog(
+                                                          context.pushNamed(
+                                                            'CreateStudent',
+                                                            queryParameters: {
+                                                              'studentToEdit':
+                                                                  serializeParam(
+                                                                listViewStudentsRecord,
+                                                                ParamType
+                                                                    .Document,
+                                                              ),
+                                                            }.withoutNulls,
+                                                            extra: <String,
+                                                                dynamic>{
+                                                              'studentToEdit':
+                                                                  listViewStudentsRecord,
+                                                              kTransitionInfoKey:
+                                                                  TransitionInfo(
+                                                                hasTransition:
+                                                                    true,
+                                                                transitionType:
+                                                                    PageTransitionType
+                                                                        .rightToLeft,
+                                                              ),
+                                                            },
+                                                          );
+                                                        },
+                                                        text:
+                                                            FFLocalizations.of(
+                                                                    context)
+                                                                .getText(
+                                                          'k7iz54bq' /* Edit */,
+                                                        ),
+                                                        icon: Icon(
+                                                          Icons.edit,
+                                                          size: 15.0,
+                                                        ),
+                                                        options:
+                                                            FFButtonOptions(
+                                                          height: 40.0,
+                                                          padding:
+                                                              EdgeInsetsDirectional
+                                                                  .fromSTEB(
+                                                                      24.0,
+                                                                      0.0,
+                                                                      24.0,
+                                                                      0.0),
+                                                          iconPadding:
+                                                              EdgeInsetsDirectional
+                                                                  .fromSTEB(
+                                                                      0.0,
+                                                                      0.0,
+                                                                      0.0,
+                                                                      0.0),
+                                                          color: FlutterFlowTheme
+                                                                  .of(context)
+                                                              .accent4,
+                                                          textStyle:
+                                                              FlutterFlowTheme.of(
+                                                                      context)
+                                                                  .titleSmall
+                                                                  .override(
+                                                                    fontFamily:
+                                                                        FlutterFlowTheme.of(context)
+                                                                            .titleSmallFamily,
+                                                                    color: Colors
+                                                                        .white,
+                                                                    useGoogleFonts: GoogleFonts
+                                                                            .asMap()
+                                                                        .containsKey(
+                                                                            FlutterFlowTheme.of(context).titleSmallFamily),
+                                                                  ),
+                                                          elevation: 3.0,
+                                                          borderSide:
+                                                              BorderSide(
+                                                            color: Colors
+                                                                .transparent,
+                                                            width: 1.0,
+                                                          ),
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(
+                                                                      8.0),
+                                                        ),
+                                                      ),
+                                                      FFButtonWidget(
+                                                        onPressed: () async {
+                                                          logFirebaseEvent(
+                                                              'STUDENTS_PAGE_PAGE_DELETE_BTN_ON_TAP');
+                                                          var _shouldSetState =
+                                                              false;
+                                                          var confirmDialogResponse =
+                                                              await showDialog<
+                                                                      bool>(
                                                                     context:
                                                                         context,
                                                                     builder:
                                                                         (alertDialogContext) {
                                                                       return AlertDialog(
                                                                         title: Text(
-                                                                            'Error'),
+                                                                            'Confirm delete'),
                                                                         content:
-                                                                            Text('Failed to delete student record'),
+                                                                            Text(valueOrDefault<String>(
+                                                                          'Are you sure you want to delete this student?${'${listViewStudentsRecord.lastName} ${listViewStudentsRecord.firstName}'}',
+                                                                          'Are you sure you want to delete this student?',
+                                                                        )),
                                                                         actions: [
                                                                           TextButton(
                                                                             onPressed: () =>
-                                                                                Navigator.pop(alertDialogContext),
+                                                                                Navigator.pop(alertDialogContext, false),
                                                                             child:
-                                                                                Text('Ok'),
+                                                                                Text('Cancel'),
+                                                                          ),
+                                                                          TextButton(
+                                                                            onPressed: () =>
+                                                                                Navigator.pop(alertDialogContext, true),
+                                                                            child:
+                                                                                Text('Confirm'),
                                                                           ),
                                                                         ],
                                                                       );
                                                                     },
-                                                                  );
-                                                                  setState(() {
-                                                                    _model.showList =
-                                                                        true;
-                                                                  });
-                                                                  if (_shouldSetState)
-                                                                    setState(
-                                                                        () {});
-                                                                  return;
-                                                                }
-                                                              } else {
-                                                                if (_shouldSetState)
-                                                                  setState(
-                                                                      () {});
-                                                                return;
-                                                              }
+                                                                  ) ??
+                                                                  false;
+                                                          if (confirmDialogResponse) {
+                                                            _model.deleteStudentResult =
+                                                                await actions
+                                                                    .deleteStudentAccount(
+                                                              listViewStudentsRecord
+                                                                  .reference,
+                                                            );
+                                                            _shouldSetState =
+                                                                true;
+                                                            if (_model
+                                                                    .deleteStudentResult ==
+                                                                'Success') {
+                                                              await listViewStudentsRecord
+                                                                  .reference
+                                                                  .delete();
+                                                              ScaffoldMessenger
+                                                                      .of(context)
+                                                                  .clearSnackBars();
+                                                              ScaffoldMessenger
+                                                                      .of(context)
+                                                                  .showSnackBar(
+                                                                SnackBar(
+                                                                  content: Text(
+                                                                    'Student was deleted successfully',
+                                                                    style:
+                                                                        TextStyle(
+                                                                      color: FlutterFlowTheme.of(
+                                                                              context)
+                                                                          .primary,
+                                                                    ),
+                                                                  ),
+                                                                  duration: Duration(
+                                                                      milliseconds:
+                                                                          4000),
+                                                                  backgroundColor:
+                                                                      Colors
+                                                                          .black,
+                                                                ),
+                                                              );
+
+                                                              context.goNamed(
+                                                                  'studentsPage');
 
                                                               if (_shouldSetState)
                                                                 setState(() {});
-                                                            },
-                                                            text: FFLocalizations
-                                                                    .of(context)
-                                                                .getText(
-                                                              'oexquwkq' /* Delete */,
-                                                            ),
-                                                            icon: Icon(
-                                                              Icons
-                                                                  .delete_forever,
-                                                              size: 15.0,
-                                                            ),
-                                                            options:
-                                                                FFButtonOptions(
-                                                              height: 40.0,
-                                                              padding:
-                                                                  EdgeInsetsDirectional
-                                                                      .fromSTEB(
-                                                                          24.0,
-                                                                          0.0,
-                                                                          24.0,
-                                                                          0.0),
-                                                              iconPadding:
-                                                                  EdgeInsetsDirectional
-                                                                      .fromSTEB(
-                                                                          0.0,
-                                                                          0.0,
-                                                                          0.0,
-                                                                          0.0),
-                                                              color: FlutterFlowTheme
-                                                                      .of(context)
-                                                                  .error,
-                                                              textStyle:
-                                                                  FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .titleSmall
-                                                                      .override(
-                                                                        fontFamily:
-                                                                            FlutterFlowTheme.of(context).titleSmallFamily,
-                                                                        color: Colors
-                                                                            .white,
-                                                                        useGoogleFonts:
-                                                                            GoogleFonts.asMap().containsKey(FlutterFlowTheme.of(context).titleSmallFamily),
+                                                              return;
+                                                            } else {
+                                                              await showDialog(
+                                                                context:
+                                                                    context,
+                                                                builder:
+                                                                    (alertDialogContext) {
+                                                                  return AlertDialog(
+                                                                    title: Text(
+                                                                        'Error'),
+                                                                    content: Text(
+                                                                        _model
+                                                                            .deleteStudentResult!),
+                                                                    actions: [
+                                                                      TextButton(
+                                                                        onPressed:
+                                                                            () =>
+                                                                                Navigator.pop(alertDialogContext),
+                                                                        child: Text(
+                                                                            'Ok'),
                                                                       ),
-                                                              elevation: 3.0,
-                                                              borderSide:
-                                                                  BorderSide(
-                                                                color: Colors
-                                                                    .transparent,
-                                                                width: 1.0,
-                                                              ),
-                                                              borderRadius:
-                                                                  BorderRadius
-                                                                      .circular(
-                                                                          8.0),
-                                                            ),
+                                                                    ],
+                                                                  );
+                                                                },
+                                                              );
+                                                              if (_shouldSetState)
+                                                                setState(() {});
+                                                              return;
+                                                            }
+                                                          } else {
+                                                            if (_shouldSetState)
+                                                              setState(() {});
+                                                            return;
+                                                          }
+
+                                                          if (_shouldSetState)
+                                                            setState(() {});
+                                                        },
+                                                        text:
+                                                            FFLocalizations.of(
+                                                                    context)
+                                                                .getText(
+                                                          'oexquwkq' /* Delete */,
+                                                        ),
+                                                        icon: Icon(
+                                                          Icons.delete_forever,
+                                                          size: 15.0,
+                                                        ),
+                                                        options:
+                                                            FFButtonOptions(
+                                                          height: 40.0,
+                                                          padding:
+                                                              EdgeInsetsDirectional
+                                                                  .fromSTEB(
+                                                                      24.0,
+                                                                      0.0,
+                                                                      24.0,
+                                                                      0.0),
+                                                          iconPadding:
+                                                              EdgeInsetsDirectional
+                                                                  .fromSTEB(
+                                                                      0.0,
+                                                                      0.0,
+                                                                      0.0,
+                                                                      0.0),
+                                                          color: FlutterFlowTheme
+                                                                  .of(context)
+                                                              .error,
+                                                          textStyle:
+                                                              FlutterFlowTheme.of(
+                                                                      context)
+                                                                  .titleSmall
+                                                                  .override(
+                                                                    fontFamily:
+                                                                        FlutterFlowTheme.of(context)
+                                                                            .titleSmallFamily,
+                                                                    color: Colors
+                                                                        .white,
+                                                                    useGoogleFonts: GoogleFonts
+                                                                            .asMap()
+                                                                        .containsKey(
+                                                                            FlutterFlowTheme.of(context).titleSmallFamily),
+                                                                  ),
+                                                          elevation: 3.0,
+                                                          borderSide:
+                                                              BorderSide(
+                                                            color: Colors
+                                                                .transparent,
+                                                            width: 1.0,
                                                           ),
-                                                        ],
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(
+                                                                      8.0),
+                                                        ),
                                                       ),
-                                                    ),
+                                                    ],
                                                   ),
-                                                );
-                                              },
-                                            ),
-                                          ),
+                                                ),
+                                              ),
+                                            );
+                                          },
                                         ),
-                                    ],
-                                  ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
                 ],

@@ -9,6 +9,7 @@ import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/flutter_flow/form_field_controller.dart';
 import '/custom_code/actions/index.dart' as actions;
+import 'dart:async';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -41,11 +42,18 @@ class CreateYearBookModel extends FlutterFlowModel {
   void updateYearListAtIndex(int index, Function(String) updateFn) =>
       yearList[index] = updateFn(yearList[index]);
 
+  int selectedColumns = 12;
+
   ///  State fields for stateful widgets in this page.
 
   final formKey = GlobalKey<FormState>();
   // Stores action output result for [Custom Action - generateYears] action in CreateYearBook widget.
   List<String>? years;
+  // Stores action output result for [Custom Action - getSectionNameByReference] action in CreateYearBook widget.
+  String? defaultSection;
+  // Stores action output result for [Custom Action - getCourseNameByReference] action in CreateYearBook widget.
+  String? defaultCourse;
+  Completer<List<StudentsRecord>>? firestoreRequestCompleter;
   // State field(s) for yearBookTitleTextField widget.
   TextEditingController? yearBookTitleTextFieldController;
   String? Function(BuildContext, String?)?
@@ -72,16 +80,18 @@ class CreateYearBookModel extends FlutterFlowModel {
   FormFieldController<String>? yearGraduatedDropdownValueController;
   // Stores action output result for [Custom Action - stringToInt] action in yearGraduatedDropdown widget.
   int? convertedYear;
-  // State field(s) for sectionDropdown widget.
-  String? sectionDropdownValue;
-  FormFieldController<String>? sectionDropdownValueController;
-  // Stores action output result for [Custom Action - getSectionReferenceByName] action in sectionDropdown widget.
-  DocumentReference? sectionActionOutput;
   // State field(s) for courseDropdown widget.
   String? courseDropdownValue;
   FormFieldController<String>? courseDropdownValueController;
   // Stores action output result for [Custom Action - getCourseReferenceByName] action in courseDropdown widget.
   DocumentReference? courseActionOutput;
+  // State field(s) for sectionDropdown widget.
+  String? sectionDropdownValue;
+  FormFieldController<String>? sectionDropdownValueController;
+  // Stores action output result for [Custom Action - getSectionReferenceByName] action in sectionDropdown widget.
+  DocumentReference? sectionActionOutput;
+  // Stores action output result for [Custom Action - getFilteredStudentList] action in Button widget.
+  List<DocumentReference>? updateFilteredStudent;
   // Stores action output result for [Custom Action - getFilteredStudentList] action in Button widget.
   List<DocumentReference>? filteredStudent;
 
@@ -100,4 +110,18 @@ class CreateYearBookModel extends FlutterFlowModel {
 
   /// Additional helper methods are added here.
 
+  Future waitForFirestoreRequestCompleted({
+    double minWait = 0,
+    double maxWait = double.infinity,
+  }) async {
+    final stopwatch = Stopwatch()..start();
+    while (true) {
+      await Future.delayed(Duration(milliseconds: 50));
+      final timeElapsed = stopwatch.elapsedMilliseconds;
+      final requestComplete = firestoreRequestCompleter?.isCompleted ?? false;
+      if (timeElapsed > maxWait || (requestComplete && timeElapsed > minWait)) {
+        break;
+      }
+    }
+  }
 }

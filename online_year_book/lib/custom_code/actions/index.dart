@@ -1,4 +1,5 @@
 export 'get_users_count.dart' show getUsersCount;
+export 'delete_student_account.dart' show deleteStudentAccount;
 export 'get_year_book_count.dart' show getYearBookCount;
 export 'get_all_sections.dart' show getAllSections;
 export 'get_all_courses.dart' show getAllCourses;
@@ -13,4 +14,7 @@ export 'is_course_name_taken.dart' show isCourseNameTaken;
 export 'is_section_name_taken.dart' show isSectionNameTaken;
 export 'string_to_int.dart' show stringToInt;
 export 'get_filtered_student_list.dart' show getFilteredStudentList;
-export 'delete_student_account.dart' show deleteStudentAccount;
+export 'is_admin_user_name_valid.dart' show isAdminUserNameValid;
+export 'delete_admin_account.dart' show deleteAdminAccount;
+export 'create_user_account.dart' show createUserAccount;
+export 'check_if_admin.dart' show checkIfAdmin;

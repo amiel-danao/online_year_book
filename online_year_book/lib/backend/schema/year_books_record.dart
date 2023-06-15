@@ -44,6 +44,11 @@ class YearBooksRecord extends FirestoreRecord {
   DateTime? get timePosted => _timePosted;
   bool hasTimePosted() => _timePosted != null;
 
+  // "columns" field.
+  int? _columns;
+  int get columns => _columns ?? 0;
+  bool hasColumns() => _columns != null;
+
   void _initializeFields() {
     _students = getDataList(snapshotData['students']);
     _title = snapshotData['title'] as String?;
@@ -51,6 +56,7 @@ class YearBooksRecord extends FirestoreRecord {
     _schoolYear = snapshotData['school_year'] as int?;
     _section = snapshotData['section'] as DocumentReference?;
     _timePosted = snapshotData['time_posted'] as DateTime?;
+    _columns = snapshotData['columns'] as int?;
   }
 
   static CollectionReference get collection =>
@@ -93,6 +99,7 @@ Map<String, dynamic> createYearBooksRecordData({
   int? schoolYear,
   DocumentReference? section,
   DateTime? timePosted,
+  int? columns,
 }) {
   final firestoreData = mapToFirestore(
     <String, dynamic>{
@@ -101,6 +108,7 @@ Map<String, dynamic> createYearBooksRecordData({
       'school_year': schoolYear,
       'section': section,
       'time_posted': timePosted,
+      'columns': columns,
     }.withoutNulls,
   );
 

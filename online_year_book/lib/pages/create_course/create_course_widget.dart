@@ -40,14 +40,23 @@ class _CreateCourseWidgetState extends State<CreateCourseWidget> {
     // On page load action.
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       logFirebaseEvent('CREATE_COURSE_CreateCourse_ON_INIT_STATE');
-      if (widget.courseToEdit != null) {
-        setState(() {
-          _model.courseNameEditController?.text = widget.courseToEdit!.name;
-        });
-        setState(() {
-          _model.courseAbbreviationEditController?.text =
-              widget.courseToEdit!.abbreviation;
-        });
+      if (valueOrDefault<bool>(currentUserDocument?.isAdmin, false) == true) {
+        if (widget.courseToEdit != null) {
+          setState(() {
+            _model.courseNameEditController?.text = widget.courseToEdit!.name;
+          });
+          setState(() {
+            _model.courseAbbreviationEditController?.text =
+                widget.courseToEdit!.abbreviation;
+          });
+          return;
+        } else {
+          return;
+        }
+      } else {
+        context.pushNamed('YearBooksPage');
+
+        return;
       }
     });
 

@@ -150,18 +150,6 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
               builder: (context, params) => LeadCapturePageWidget(),
             ),
             FFRoute(
-              name: 'CreateStudentOld',
-              path: 'createStudentOld',
-              asyncParams: {
-                'studentToEdit':
-                    getDoc(['students'], StudentsRecord.fromSnapshot),
-              },
-              builder: (context, params) => CreateStudentOldWidget(
-                studentToEdit:
-                    params.getParam('studentToEdit', ParamType.Document),
-              ),
-            ),
-            FFRoute(
               name: 'CreateSection',
               path: 'createSection',
               requireAuth: true,
@@ -221,6 +209,16 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
               builder: (context, params) => CreateYearBookWidget(
                 yearBookToEdit:
                     params.getParam('yearBookToEdit', ParamType.Document),
+              ),
+            ),
+            FFRoute(
+              name: 'CreateAdmin',
+              path: 'createAdmin',
+              asyncParams: {
+                'adminToEdit': getDoc(['users'], UsersRecord.fromSnapshot),
+              },
+              builder: (context, params) => CreateAdminWidget(
+                adminToEdit: params.getParam('adminToEdit', ParamType.Document),
               ),
             )
           ].map((r) => r.toRoute(appStateNotifier)).toList(),
